@@ -229,6 +229,25 @@ a.tag:hover { text-decoration: none; background: var(--accent-2); color: var(--a
 .toc li a:hover, .toc li a.active { color: var(--fg); border-left-color: var(--accent); text-decoration: none; }
 .edit { display: inline-block; margin-top: 1.2rem; font-size: 0.8rem; color: var(--fg-3); }
 
+/* Collapsed depth sections */
+details.deep { border-top: 1px solid var(--line); margin: 0; }
+details.deep:last-of-type { border-bottom: 1px solid var(--line); }
+details.deep > summary {
+  cursor: pointer; list-style: none; padding: 0.7rem 0.2rem;
+  display: flex; align-items: center; gap: 0.6rem;
+  font-family: var(--serif); font-size: 1.15rem; color: var(--fg-2);
+}
+details.deep > summary::-webkit-details-marker { display: none; }
+details.deep > summary::before { content: "▸"; color: var(--fg-3); font-size: 0.8em; }
+details.deep[open] > summary::before { content: "▾"; }
+details.deep > summary:hover { color: var(--fg); }
+details.deep[open] > summary { color: var(--fg); }
+.deep-body { padding: 0 0 1.2rem 1.3rem; }
+.deep-body > :first-child { margin-top: 0; }
+.deep-lead { margin: 2.2rem 0 0; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.1em; color: var(--fg-3); font-weight: 600; }
+.toc a.deep { color: var(--fg-3); }
+.toc a.deep::before { content: "▸ "; font-size: 0.8em; }
+
 /* Callouts */
 .callout { border: 1px solid var(--line); border-left-width: 4px; border-radius: var(--radius); margin: 1.2em 0; background: var(--bg-2); }
 .callout-head { display: flex; gap: 0.6rem; align-items: baseline; padding: 0.45rem 1rem 0; }

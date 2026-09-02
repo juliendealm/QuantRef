@@ -35,8 +35,8 @@ const slug =
     .replace(/(^-|-$)/g, "");
 
 const headings = {
-  en: ["Intuition", "Mathematical Formulation", "Derivation", "Assumptions & Edge Cases", "Worked Example", "Why It Matters in Quant Finance", "Common Mistakes", sections.en.revision, sections.en.formulas, sections.en.interview],
-  fr: ["Intuition", "Formulation mathématique", "Dérivation", "Hypothèses et cas limites", "Exemple détaillé", "Pourquoi c'est important en finance quantitative", "Erreurs fréquentes", sections.fr.revision, sections.fr.formulas, sections.fr.interview],
+  en: ["Intuition", "Key Formulas", "Common Mistakes", "30-Second Revision", "Mathematical Formulation", "Derivation", "Assumptions & Edge Cases", "Worked Example", "Why It Matters in Quant Finance", "Interview Questions"],
+  fr: ["Intuition", "Formules clés", "Erreurs fréquentes", "Révision en 30 secondes", "Formulation mathématique", "Dérivation", "Hypothèses et cas limites", "Exemple détaillé", "Pourquoi c'est important en finance quantitative", "Questions d'entretien"],
 };
 
 for (const lang of site.languages) {

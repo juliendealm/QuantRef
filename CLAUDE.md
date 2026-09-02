@@ -36,20 +36,48 @@ prerequisites: [slug, ...]                 # identical across languages; drives 
 related: [slug, ...]                       # identical across languages
 ```
 
-Section headings, in this order (the build looks up the last three by exact text):
+Section headings, in this exact order. The first four render open on the page;
+the last six are collapsed behind a disclosure, so a note reads short and the
+depth is one click away. The build looks up the last three by exact text.
 
-| en | fr |
+| # | en | fr | shown |
+|---|---|---|---|
+| 1 | Intuition | Intuition | open |
+| 2 | Key Formulas | Formules clés | open |
+| 3 | Common Mistakes | Erreurs fréquentes | open |
+| 4 | 30-Second Revision | Révision en 30 secondes | open |
+| 5 | Mathematical Formulation | Formulation mathématique | collapsed |
+| 6 | Derivation | Dérivation | collapsed |
+| 7 | Assumptions & Edge Cases | Hypothèses et cas limites | collapsed |
+| 8 | Worked Example | Exemple détaillé | collapsed |
+| 9 | Why It Matters in Quant Finance | Pourquoi c'est important en finance quantitative | collapsed |
+| 10 | Interview Questions | Questions d'entretien | collapsed |
+
+`sectionOrder` and `openSections` in `site.config.js` are the source of truth.
+
+## Length
+
+These are reference notes for revision, not a textbook. Be brief and dense.
+A whole note is about **1200-1500 words**, and the four open sections are about
+**400 words together** — that is what the reader sees on arrival.
+
+| section | words |
 |---|---|
-| Intuition | Intuition |
-| Mathematical Formulation | Formulation mathématique |
-| Derivation | Dérivation |
-| Assumptions & Edge Cases | Hypothèses et cas limites |
-| Worked Example | Exemple détaillé |
-| Why It Matters in Quant Finance | Pourquoi c'est important en finance quantitative |
-| Common Mistakes | Erreurs fréquentes |
-| 30-Second Revision | Révision en 30 secondes |
-| Key Formulas | Formules clés |
-| Interview Questions | Questions d'entretien |
+| Intuition | 90 |
+| Key Formulas | a table, no prose |
+| Common Mistakes | 3 pitfalls, 1-2 sentences each |
+| 30-Second Revision | 70 |
+| Mathematical Formulation | 180 |
+| Derivation | 150 |
+| Assumptions & Edge Cases | 130, as bullets |
+| Worked Example | 150 plus the code |
+| Why It Matters in Quant Finance | 120, as bullets |
+| Interview Questions | 4 questions, hint and answer each, ~90 words per question |
+
+Cut ruthlessly: no restating the same idea in two registers, no throat-clearing
+before a formula, no paragraph that only announces the next one. Prefer a
+bulleted list to prose wherever the content is a list. Keep every formula, every
+number and every pitfall; cut the words around them.
 
 Markup available inside the body:
 

@@ -20,6 +20,37 @@ export const subjects = [
   { id: "microstructure", en: "Market Microstructure", fr: "Microstructure de marché" },
 ];
 
+// Canonical section order. The first four render open; the rest are collapsed
+// behind a disclosure so a note reads short and the depth stays one click away.
+export const sectionOrder = {
+  en: [
+    "Intuition",
+    "Key Formulas",
+    "Common Mistakes",
+    "30-Second Revision",
+    "Mathematical Formulation",
+    "Derivation",
+    "Assumptions & Edge Cases",
+    "Worked Example",
+    "Why It Matters in Quant Finance",
+    "Interview Questions",
+  ],
+  fr: [
+    "Intuition",
+    "Formules clés",
+    "Erreurs fréquentes",
+    "Révision en 30 secondes",
+    "Formulation mathématique",
+    "Dérivation",
+    "Hypothèses et cas limites",
+    "Exemple détaillé",
+    "Pourquoi c'est important en finance quantitative",
+    "Questions d'entretien",
+  ],
+};
+
+export const openSections = 4; // how many of sectionOrder render expanded
+
 // Section headings that the build recognises (for the revision card and interview bank).
 export const sections = {
   en: { revision: "30-Second Revision", formulas: "Key Formulas", interview: "Interview Questions" },

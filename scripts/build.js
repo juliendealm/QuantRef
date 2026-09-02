@@ -10,7 +10,7 @@ import anchor from "markdown-it-anchor";
 import container from "markdown-it-container";
 import texmath from "markdown-it-texmath";
 import katex from "katex";
-import { site, subjects, sections, ui } from "../site.config.js";
+import { site, subjects, sections, sectionOrder, openSections, ui } from "../site.config.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = path.join(ROOT, "src");
@@ -227,22 +227,42 @@ function renderConcept(md, concept, lang, index) {
     }
   });
 
-  // Section ranges by h2 heading.
+  // Section ranges by h2 heading, in document order.
   const toc = [];
   const sectionRanges = {};
+  const ordered = [];
   let currentH2 = null;
   tokens.forEach((tok, i) => {
     if (tok.type === "heading_open" && tok.tag === "h2") {
       const text = tokens[i + 1].content;
       const id = tok.attrGet("id");
-      toc.push({ id, text });
-      if (currentH2) sectionRanges[currentH2].end = i;
+      const deep = sectionOrder[lang].indexOf(text) >= openSections;
+      toc.push({ id, text, deep });
+      if (currentH2) {
+        sectionRanges[currentH2].end = i;
+        ordered[ordered.length - 1].end = i;
+      }
       currentH2 = text;
       sectionRanges[text] = { start: i, end: tokens.length };
+      ordered.push({ text, id, deep, start: i, end: tokens.length });
     }
   });
 
-  const html = md.renderer.render(tokens, md.options, env);
+  // Render the four lead sections open and the rest inside a disclosure, so the
+  // page reads as a short note with the depth one click away.
+  const render = (a, b) => md.renderer.render(tokens.slice(a, b), md.options, env);
+  let html = ordered.length ? render(0, ordered[0].start) : render(0, tokens.length);
+  for (const sec of ordered) {
+    const body = render(sec.start + 3, sec.end); // skip heading_open, inline, heading_close
+    if (!sec.deep) {
+      html += render(sec.start, sec.start + 3) + body;
+    } else {
+      html +=
+        `<details class="deep" id="sec-${sec.id}">` +
+        `<summary><span class="deep-title">${escapeHtml(sec.text)}</span></summary>` +
+        `<div class="deep-body" id="${sec.id}">${body}</div></details>`;
+    }
+  }
 
   function renderSection(name, { skipHeading = true } = {}) {
     const r = sectionRanges[name];
@@ -385,7 +405,7 @@ function conceptPage(concept, rendered, lang, index) {
   ${usedBy.length ? `<h4>${t.usedBy}</h4>${list(usedBy)}` : ""}
   ${related.length ? `<h4>${t.related}</h4>${list(related)}` : ""}
   <h4>${t.onThisPage}</h4>
-  <ol class="toc">${rendered.toc.map((h) => `<li><a href="#${h.id}">${escapeHtml(h.text)}</a></li>`).join("")}</ol>
+  <ol class="toc">${rendered.toc.map((h) => `<li><a class="${h.deep ? "deep" : ""}" href="#${h.id}">${escapeHtml(h.text)}</a></li>`).join("")}</ol>
   <a class="edit" href="${site.repo}/edit/main/${concept.file}">${t.edit}</a>
 </aside>`;
 

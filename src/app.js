@@ -316,6 +316,25 @@
     renderList();
   }
 
+  // ------------------------------------------------- open collapsed sections
+  // A link to a heading inside a closed <details> would otherwise scroll nowhere.
+  function revealHash() {
+    const id = decodeURIComponent(location.hash.slice(1));
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    let d = el.closest("details");
+    while (d) { d.open = true; d = d.parentElement.closest("details"); }
+    el.scrollIntoView({ block: "start" });
+  }
+  window.addEventListener("hashchange", revealHash);
+  if (location.hash) setTimeout(revealHash, 0);
+  document.querySelectorAll('.toc a[href^="#"]').forEach((a) =>
+    a.addEventListener("click", () => setTimeout(revealHash, 0))
+  );
+  // Printing should show everything, not just what happens to be open.
+  window.addEventListener("beforeprint", () => document.querySelectorAll("details.deep").forEach((d) => (d.open = true)));
+
   // ---------------------------------------------------------------- TOC highlight
   const tocLinks = document.querySelectorAll(".toc a");
   if (tocLinks.length && "IntersectionObserver" in window) {
