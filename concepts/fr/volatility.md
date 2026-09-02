@@ -1,7 +1,7 @@
 ---
 title: Volatilité
 subject: risk
-summary: L'écart-type des rendements, coté en annualisé. Le seul nombre qui pilote le prix des options, les limites de risque et le dimensionnement des positions — groupé en paquets, à retour à la moyenne, jamais observé et bruité à estimer.
+summary: L'écart-type des rendements, annualisée par convention. Le seul nombre qui pilote le prix des options, les limites de risque et le dimensionnement des positions — elle arrive en grappes, revient à sa moyenne, ne s'observe jamais directement et s'estime avec beaucoup de bruit.
 difficulty: 2
 interview: 5
 tags: [volatility, realised-volatility, implied-volatility, ewma, garch, annualisation]
@@ -11,7 +11,7 @@ related: [black-scholes, greeks, value-at-risk]
 
 ## Intuition
 
-La volatilité est l'écart-type des rendements : la racine carrée de la [[variance]], remise dans les unités du rendement pour être lisible. « Cette action a une vol de 20 % » signifie que sur un an, sous un modèle à peu près normal, son rendement tombera à $\pm 20\,\%$ de sa moyenne environ deux fois sur trois.
+La volatilité est l'écart-type des rendements : la racine carrée de la [[variance]], remise dans les unités du rendement pour être lisible. « Cette action a une vol de 20 % » signifie que sur un an, sous un modèle à peu près normal, son rendement se situera à moins de $\pm 20\,\%$ de sa moyenne environ deux fois sur trois.
 
 Trois choses rendent la volatilité plus subtile qu'un écart-type de manuel.
 
@@ -81,7 +81,7 @@ $$
 $$
 :::
 
-$\alpha + \beta$ est la **persistance** : la fraction d'un choc de variance qui survit un jour. Sur actions, les estimations typiques sont $\alpha \approx 0{,}05$–$0{,}10$ et $\beta \approx 0{,}85$–$0{,}92$, donc $\alpha + \beta \approx 0{,}95$–$0{,}99$ et les chocs s'amortissent avec une demi-vie de quelques semaines. L'EWMA est exactement le cas limite $\omega = 0$, $\alpha + \beta = 1$ : persistance infinie, aucun niveau de long terme vers lequel revenir. Pour $\lambda = 0{,}94$, la demi-vie vaut $\ln(0{,}5)/\ln(0{,}94) \approx 11$ jours.
+$\alpha + \beta$ est la **persistance** : la fraction d'un choc de variance qui survit un jour. Sur actions, les estimations typiques sont $\alpha \approx 0{,}05$–$0{,}10$ et $\beta \approx 0{,}88$–$0{,}92$, donc $\alpha + \beta \approx 0{,}95$–$0{,}99$ et les chocs s'amortissent avec une demi-vie de quelques semaines. L'EWMA est exactement le cas limite $\omega = 0$, $\alpha + \beta = 1$ : persistance infinie, aucun niveau de long terme vers lequel revenir. Pour $\lambda = 0{,}94$, la demi-vie vaut $\ln(0{,}5)/\ln(0{,}94) \approx 11$ jours.
 
 ## Dérivation
 
@@ -95,7 +95,7 @@ Passer du jour à l'année, c'est le même énoncé avec $h = N$ ; le $\sqrt{252
 
 **Le regroupement de volatilité ne casse pas directement la règle en $\sqrt{h}$.** Si $\sigma_t$ varie mais que les rendements restent non corrélés, $\operatorname{Var}(r_{0,h}) = \sum_t \mathbb{E}[\sigma_t^2]$ reste vrai — la règle va bien pour la variance *inconditionnelle*. Ce que le regroupement casse, c'est l'application de la règle à une estimation *conditionnelle* : mettre à l'échelle par $\sqrt{10}$ un $\sigma_t$ aujourd'hui élevé ignore le retour à la moyenne et surestime le risque à dix jours. La prévision GARCH le rend explicite : la variance conditionnelle à $k$ pas vaut
 $$
-\mathbb{E}[\sigma_{t+k}^2 \mid \mathcal{F}_t] = \sigma_\infty^2 + (\alpha+\beta)^{k}\big(\sigma_{t+1}^2 - \sigma_\infty^2\big),
+\mathbb{E}[\sigma_{t+k}^2 \mid \mathcal{F}_t] = \sigma_\infty^2 + (\alpha+\beta)^{k-1}\big(\sigma_{t+1}^2 - \sigma_\infty^2\big), \qquad k \ge 1,
 $$
 qui ramène vers $\sigma_\infty^2$ à la vitesse $\alpha + \beta$. Ce n'est que lorsque $\alpha + \beta = 1$ (EWMA) que l'extrapolation plate en $\sqrt{h}$ est cohérente avec elle-même.
 
@@ -111,8 +111,8 @@ Si on fixe l'erreur relative à $10\,\%$ : $n = 1/(2 \cdot 0{,}01) = 50$ jours. 
 
 ## Hypothèses et cas limites
 
-- **Les estimateurs de plage ratent les gaps overnight.** Parkinson et Garman–Klass ne mesurent que la séance. Pour une action qui gappe sur ses résultats, ils peuvent gravement sous-estimer le vrai risque close-to-close. Ils supposent aussi une dérive nulle et une observation continue : avec une forte tendance ils sont biaisés, et l'échantillonnage discret fait que le plus haut et le plus bas observés sont à l'intérieur des vrais, ce qui les biaise **vers le bas** (de l'ordre de $-1\,\%$ à $-3\,\%$ sur des valeurs liquides, bien plus sur des titres étroits).
-- **Le raccourci de moyenne nulle.** Forcer $\bar{r} = 0$ est un arbitrage biais–variance. Sur une fenêtre de 21 jours, l'erreur d'estimation de la moyenne domine la dérive elle-même, donc l'estimateur contraint est généralement meilleur ; sur des fenêtres pluriannuelles, il faut retrancher la moyenne.
+- **Les estimateurs de plage ratent les gaps overnight.** Parkinson et Garman–Klass ne mesurent que la séance. Pour une action qui gappe sur ses résultats, ils peuvent gravement sous-estimer le vrai risque close-to-close. Ils supposent aussi une dérive nulle et une observation continue : avec une forte tendance ils sont biaisés, et l'échantillonnage discret fait que le plus haut et le plus bas observés sont à l'intérieur des vrais, ce qui les biaise **vers le bas** (de l'ordre de $-1\,\%$ à $-3\,\%$ sur des valeurs liquides, bien plus sur des titres peu liquides).
+- **Le raccourci de moyenne nulle.** Forcer $\bar{r} = 0$ est un compromis biais–variance. Sur une fenêtre de 21 jours, l'erreur d'estimation de la moyenne domine la dérive elle-même, donc l'estimateur contraint est généralement meilleur ; sur des fenêtres pluriannuelles, il faut retrancher la moyenne.
 - **Prix non synchrones ou figés.** Les actifs illiquides affichent une volatilité et une corrélation artificiellement basses parce que les prix ne se mettent pas à jour. Le rebond bid–ask fait l'inverse en haute fréquence : il crée de l'autocorrélation négative et gonfle la variance réalisée haute fréquence — d'où les estimateurs robustes au bruit de microstructure.
 - **$\alpha + \beta \ge 1$.** La variance inconditionnelle GARCH $\omega/(1-\alpha-\beta)$ n'existe que si $\alpha + \beta < 1$. Une persistance estimée très proche de $1$ est fréquente et signale souvent une rupture structurelle non modélisée plutôt qu'une véritable racine unitaire dans la variance.
 - **Volatilité de quoi ?** La volatilité de rendements de prix, d'un spread, d'un taux (vol en points de base) et d'une série de futures ajustée des rolls sont des nombres différents. Coter une vol sans dire de quelle série elle vient est aussi incomplet que coter une VaR sans horizon.
@@ -177,22 +177,22 @@ L'erreur de l'EWMA est environ $42\,\%$ plus faible que celle de la fenêtre gli
 
 - **C'est le seul paramètre libre de [[black-scholes]].** Le spot, le strike, l'échéance et les taux sont observables ; la volatilité ne l'est pas. Le pricing d'options est donc *entièrement* un problème de prévision de volatilité, et coter un prix en unités de vol plutôt qu'en devise est la façon qu'a le marché d'évacuer tout le reste.
 - **La volatilité implicite est un prix, pas une prévision.** Inverser [[black-scholes]] pour trouver le $\sigma$ qui reproduit un prix de marché donne la vol implicite. Elle dépasse systématiquement la volatilité réalisée ultérieure — la **prime de risque de variance**, environ 1 à 3 points de vol sur les options d'indice — parce que les vendeurs d'options exigent une compensation pour être short gamma dans les krachs. L'implicite varie aussi avec le strike et l'échéance (le smile), ce qui affirme directement que le modèle à vol constante est faux.
-- **La volatilité se négocie pour elle-même.** Le P&L d'une option delta-couverte vaut $\tfrac12 \sum \Gamma S^2(r_t^2 - \sigma_{\text{imp}}^2 \Delta t)$ — variance réalisée contre variance implicite (voir [[greeks]]). Un **variance swap** paie $N(\sigma_R^2 - K^2)$ et en est l'instrument naturel, car c'est la *variance*, et non la volatilité, qu'un portefeuille statique d'options pondérées en $1/K^2$ plus une couverture delta dynamique réplique exactement (l'argument du log-contract). Un volatility swap paie $\sqrt{\text{variance}}$, fonction concave, et exige donc un ajustement de convexité sans réplication statique possible — c'est pourquoi le marché cote des variance swaps et en déduit les vol swaps.
+- **La volatilité se négocie pour elle-même.** Le P&L d'une option delta-couverte vaut $\tfrac12 \sum \Gamma S^2(r_t^2 - \sigma_{\text{impl}}^2 \Delta t)$ — variance réalisée contre variance implicite (voir [[greeks]]). Un **variance swap** paie $N(\sigma_R^2 - K^2)$ et en est l'instrument naturel, car c'est la *variance*, et non la volatilité, qu'un portefeuille statique d'options pondérées en $1/K^2$ plus une couverture delta dynamique réplique exactement (l'argument du log-contract). Un volatility swap paie $\sqrt{\text{variance}}$, fonction concave, et exige donc un ajustement de convexité sans réplication statique possible — c'est pourquoi le marché cote des variance swaps et en déduit les vol swaps.
 - **Limites de risque et dimensionnement.** La volatilité est le $\sigma$ de la [[value-at-risk]] paramétrique, le facteur d'échelle des stratégies à volatilité cible ($w_t \propto 1/\hat\sigma_t$), et le dénominateur de tout ratio de Sharpe.
-- **Les faits stylisés dictent le choix de modèle.** La volatilité se **regroupe** (les grands mouvements suivent les grands mouvements — c'est ce que capture GARCH) ; les rendements ont des **queues épaisses** même après conditionnement ; l'**effet de levier** fait qu'un rendement négatif augmente plus la volatilité future qu'un rendement positif de même taille (d'où les modèles asymétriques comme GJR-GARCH et le skew actions) ; et la volatilité **revient à sa moyenne**. Surtout, elle est bien plus prévisible que les rendements : un $R^2$ proche de $0$ pour la prévision de rendement est normal, tandis que $0{,}3$–$0{,}5$ pour la variance du lendemain est courant.
+- **Les faits stylisés dictent le choix de modèle.** La volatilité se **regroupe** (les grands mouvements suivent les grands mouvements — c'est ce que capture GARCH) ; les rendements ont des **queues épaisses** même après conditionnement ; l'**effet de levier** fait qu'un rendement négatif augmente plus la volatilité future qu'un rendement positif de même taille (d'où les modèles asymétriques comme GJR-GARCH et le skew actions) ; et la volatilité **revient à sa moyenne**. Surtout, elle est bien plus prévisible que les rendements : un $R^2$ proche de $0$ pour la prévision de rendement est normal, tandis que $0{,}3$–$0{,}5$ pour la variance du lendemain est courant lorsque la cible est un estimateur de variance réalisée construit sur des données intrajournalières. Face au carré du rendement quotidien comme cible, le $R^2$ reste sous $0{,}05$, car cette cible est elle-même un estimateur très bruité.
 
 ## Erreurs fréquentes
 
 ::: pitfall Mettre à l'échelle une volatilité conditionnelle par $\sqrt{h}$
-La règle exige des rendements i.i.d. Appliquée à une estimation GARCH ou EWMA *courante* pendant un épisode de stress, elle ignore le retour à la moyenne et surestime le chiffre à 10 jours ; appliquée en période calme, elle le sous-estime. Il faut utiliser $\mathbb{E}[\sigma_{t+k}^2\mid\mathcal{F}_t] = \sigma_\infty^2 + (\alpha+\beta)^k(\sigma_{t+1}^2 - \sigma_\infty^2)$ et sommer sur $k$, pas un $\sqrt{10}$ plat.
+La règle exige des rendements i.i.d. Appliquée à une estimation GARCH ou EWMA *courante* pendant un épisode de stress, elle ignore le retour à la moyenne et surestime le chiffre à 10 jours ; appliquée en période calme, elle le sous-estime. Il faut utiliser $\mathbb{E}[\sigma_{t+k}^2\mid\mathcal{F}_t] = \sigma_\infty^2 + (\alpha+\beta)^{k-1}(\sigma_{t+1}^2 - \sigma_\infty^2)$ et sommer sur $k$, pas un $\sqrt{10}$ plat.
 :::
 
 ::: pitfall Annualiser des rendements simples comme s'ils s'additionnaient
-Seuls les rendements log s'agrègent additivement. Construire une volatilité mensuelle en multipliant par $\sqrt{21}$ des rendements *simples* quotidiens mélange une règle additive et une quantité multiplicative. L'erreur est du second ordre pour de petits mouvements et matérielle pour un actif volatil (crypto, options mono-sous-jacent) sur des horizons longs.
+Seuls les rendements log s'agrègent additivement. Construire une volatilité mensuelle en multipliant par $\sqrt{21}$ des rendements *simples* quotidiens mélange une règle additive et une quantité multiplicative. L'erreur est du second ordre pour de petits mouvements et significative pour un actif volatil (crypto, options mono-sous-jacent) sur des horizons longs.
 :::
 
 ::: pitfall Lire un changement d'estimation de volatilité comme un changement de volatilité
-Avec une fenêtre de 21 jours, l'erreur type relative vaut $1/\sqrt{42} \approx 15\,\%$. Une vol réalisée passant de $18\,\%$ à $22\,\%$ reste largement dans le bruit — avant de crier au changement de régime, demande-toi si le mouvement dépasse environ $2\hat\sigma/\sqrt{2n}$.
+Avec une fenêtre de 21 jours, l'erreur type relative vaut $1/\sqrt{42} \approx 15\,\%$. Une vol réalisée passant de $18\,\%$ à $22\,\%$ reste largement dans le bruit — avant de crier au changement de régime, demande-toi si le mouvement dépasse environ $2\hat\sigma/\sqrt{n}$ : comparer deux fenêtres indépendantes double la variance de l'écart, donc le seuil vaut $\sqrt{2}$ fois l'erreur type d'une seule estimation, et non une fois.
 :::
 
 ::: pitfall Comparer implicite et réalisée sans précaution
@@ -252,7 +252,7 @@ Utilise $\operatorname{sd}(\hat\sigma) \approx \sigma/\sqrt{2n}$.
 ::: answer
 Erreur type relative $= 1/\sqrt{2 \times 60} = 1/\sqrt{120} \approx 9{,}1\,\%$, donc $\operatorname{sd}(\hat\sigma) \approx 0{,}091 \times 25\,\% = 2{,}3$ points de vol. Un intervalle à $95\,\%$ approximatif vaut $25\,\% \pm 4{,}6\,\%$, soit à peu près de $20\,\%$ à $30\,\%$ — une bande large autour de ce qui ressemblait à un nombre précis.
 
-Avec 250 jours, l'erreur relative tombe à $1/\sqrt{500} \approx 4{,}5\,\%$, soit $\pm 2{,}2$ points. Mais l'arbitrage mord : une fenêtre de 250 jours moyenne sur une année pendant laquelle la vraie volatilité a presque certainement bougé, si bien que ce qu'on gagne en précision statistique on le perd en pertinence. L'intervalle n'est en outre valable que sous normalité et variance constante ; avec des queues épaisses et du regroupement, la taille effective d'échantillon est plus petite que $n$ et le vrai intervalle est plus large.
+Avec 250 jours, l'erreur relative tombe à $1/\sqrt{500} \approx 4{,}5\,\%$, soit $\pm 2{,}2$ points. Mais le compromis mord : une fenêtre de 250 jours moyenne sur une année pendant laquelle la vraie volatilité a presque certainement bougé, si bien que ce qu'on gagne en précision statistique on le perd en pertinence. L'intervalle n'est en outre valable que sous normalité et variance constante ; avec des queues épaisses et du regroupement, la taille effective d'échantillon est plus petite que $n$ et le vrai intervalle est plus large.
 :::
 :::
 
@@ -263,10 +263,10 @@ Réfléchis à ce que compensent ces 4 points d'écart, et à la forme du P&L de
 ::: answer
 Trois problèmes.
 
-**L'écart est attendu.** La vol implicite dépasse en moyenne la vol réalisée ultérieure — c'est la prime de risque de variance, historiquement de 1 à 3 points sur les indices actions et davantage sur les ailes. C'est la rémunération d'un risque, pas un repas gratuit : le vendeur de vol est short gamma et perd lourdement exactement quand les marchés krachent et que le reste de son portefeuille souffre aussi. La capter est une stratégie légitime au profil de gain connu et désagréable (petits gains réguliers, pertes très lourdes occasionnelles), pas un arbitrage.
+**L'écart est attendu.** La vol implicite dépasse en moyenne la vol réalisée ultérieure — c'est la prime de risque de variance, historiquement de 1 à 3 points sur les indices actions et davantage sur les ailes. C'est la rémunération d'un risque, pas de l'argent gratuit : le vendeur de vol est short gamma et perd lourdement exactement quand les marchés krachent et que le reste de son portefeuille souffre aussi. La capter est une stratégie légitime au profil de gain connu et désagréable (petits gains réguliers, pertes très lourdes occasionnelles), pas un arbitrage.
 
 **Passé contre futur.** La vol réalisée glissante est une estimation bruitée du *passé* ; l'implicite est une espérance risque-neutre sur le *mois à venir*. Avec une erreur type relative de $\pm 15\,\%$ à 21 jours, un affichage à $15\,\%$ se distingue à peine de $17\,\%$. Et s'il y a un événement connu dans la fenêtre (résultats, réunion de banque centrale), la vol réalisée future devrait être plus élevée que la vol passée.
 
-**Quelle implicite ?** Un seul nombre masque le smile. Ces $19\,\%$ valent pour un strike ; le P&L d'une position short delta-couverte vaut $\tfrac12\sum \Gamma S^2 (r_t^2 - \sigma_{\text{imp}}^2\Delta t)$, pondéré par le gamma, il dépend donc de l'*endroit* où le sous-jacent passe son temps, pas seulement de la variance réalisée moyenne. Vendre une option à $19\,\%$ et réaliser $16\,\%$ peut quand même perdre de l'argent si les mouvements se produisent là où le gamma est concentré.
+**Quelle implicite ?** Un seul nombre masque le smile. Ces $19\,\%$ valent pour un strike ; le P&L d'une position short delta-couverte vaut $\tfrac12\sum \Gamma S^2 (r_t^2 - \sigma_{\text{impl}}^2\Delta t)$, pondéré par le gamma, il dépend donc de l'*endroit* où le sous-jacent passe son temps, pas seulement de la variance réalisée moyenne. Vendre une option à $19\,\%$ et réaliser $16\,\%$ peut quand même perdre de l'argent si les mouvements se produisent là où le gamma est concentré.
 :::
 :::

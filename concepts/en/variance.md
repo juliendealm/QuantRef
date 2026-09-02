@@ -165,11 +165,11 @@ sample    w'S_hat w = 0.025057
 ```
 :::
 
-Two readings. First, $w^\top\Sigma w$ matches the direct sample variance to the third digit — the sampling error, not a modelling error, explains the gap, and plugging in the *sample* covariance reproduces the direct number exactly, as it must. Second, half of the achievable diversification is gone after 2 names and almost all of it after 10: going from 10 to 50 names buys $0.0096$ of volatility, while the correlation floor $\sigma\sqrt{\rho} = 0.20\sqrt{0.3} = 0.1095$ is untouchable.
+Two readings. First, $w^\top\Sigma w$ matches the direct sample variance to three significant figures — the sampling error, not a modelling error, explains the gap, and plugging in the *sample* covariance reproduces the direct number exactly, as it must. Second, in variance terms half of the achievable diversification is gone after 2 names and almost all of it after 10: going from 10 to 50 names buys $0.0096$ of volatility, while the correlation floor $\sigma\sqrt{\rho} = 0.20\sqrt{0.3} = 0.1095$ is untouchable.
 
 ## Why It Matters in Quant Finance
 
-- **Risk is quoted as a variance.** Every risk number starts here: [[volatility]] is $\sqrt{\operatorname{Var}}$ of returns, parametric [[value-at-risk]] is $\mu + \sigma z_\alpha$, and vega in [[greeks]] is exposure to the variance the market is pricing.
+- **Risk is quoted as a variance.** Every risk number starts here: [[volatility]] is $\sqrt{\operatorname{Var}}$ of returns, parametric [[value-at-risk]] is $\mu + \sigma z_\alpha$, and vega in [[greeks]] is exposure to the volatility the market is pricing, while a delta-hedged book is exposed to the *variance* it realises.
 - **Portfolio construction is a variance problem.** Markowitz minimises $w^\top\Sigma w$ subject to a return target; risk parity equalises each asset's contribution $w_i (\Sigma w)_i$ to it; risk budgeting decomposes it. All of them live or die on the quality of $\hat\Sigma$.
 - **Least squares is variance decomposition.** In [[linear-regression]], $R^2$ is the fraction of the variance of $y$ explained by the fit, and OLS is exactly the estimator that minimises residual variance.
 - **Hedging is variance minimisation.** The minimum-variance hedge ratio of an exposure $Y$ with an instrument $X$ is $\beta = \operatorname{Cov}(X,Y)/\operatorname{Var}(X)$ — the same formula as a regression slope, and no coincidence.

@@ -81,7 +81,7 @@ $$
 $$
 :::
 
-$\alpha + \beta$ is the **persistence**: the fraction of a variance shock that survives one day. Typical equity estimates are $\alpha \approx 0.05$–$0.10$, $\beta \approx 0.85$–$0.92$, so $\alpha + \beta \approx 0.95$–$0.99$ and shocks decay with a half-life of weeks. EWMA is exactly the boundary case $\omega = 0$, $\alpha + \beta = 1$: infinite persistence, no long-run level to revert to. For $\lambda = 0.94$ the half-life is $\ln(0.5)/\ln(0.94) \approx 11$ days.
+$\alpha + \beta$ is the **persistence**: the fraction of a variance shock that survives one day. Typical equity estimates are $\alpha \approx 0.05$–$0.10$, $\beta \approx 0.88$–$0.92$, so $\alpha + \beta \approx 0.95$–$0.99$ and shocks decay with a half-life of weeks. EWMA is exactly the boundary case $\omega = 0$, $\alpha + \beta = 1$: infinite persistence, no long-run level to revert to. For $\lambda = 0.94$ the half-life is $\ln(0.5)/\ln(0.94) \approx 11$ days.
 
 ## Derivation
 
@@ -95,7 +95,7 @@ Scaling from days to a year is the same statement with $h = N$; the widespread $
 
 **Volatility clustering does not break $\sqrt{h}$ directly.** If $\sigma_t$ varies but returns stay uncorrelated, $\operatorname{Var}(r_{0,h}) = \sum_t \mathbb{E}[\sigma_t^2]$ still holds — the rule is fine for *unconditional* variance. What clustering breaks is the use of the rule on a *conditional* estimate: scaling today's elevated $\sigma_t$ by $\sqrt{10}$ ignores mean reversion and overstates the ten-day risk. The GARCH forecast makes this explicit: the $k$-step-ahead conditional variance is
 $$
-\mathbb{E}[\sigma_{t+k}^2 \mid \mathcal{F}_t] = \sigma_\infty^2 + (\alpha+\beta)^{k}\big(\sigma_{t+1}^2 - \sigma_\infty^2\big),
+\mathbb{E}[\sigma_{t+k}^2 \mid \mathcal{F}_t] = \sigma_\infty^2 + (\alpha+\beta)^{k-1}\big(\sigma_{t+1}^2 - \sigma_\infty^2\big), \qquad k \ge 1,
 $$
 which pulls back towards $\sigma_\infty^2$ at rate $\alpha + \beta$. Only when $\alpha + \beta = 1$ (EWMA) is the flat $\sqrt{h}$ extrapolation self-consistent.
 
@@ -177,14 +177,14 @@ The EWMA's error is about $42\%$ smaller than the rolling window's. Two reasons:
 
 - **It is the only free parameter in [[black-scholes]].** Spot, strike, expiry and rates are observable; volatility is not. Option pricing is therefore *entirely* a volatility forecasting problem, and quoting a price in vol units rather than currency is the market's way of stripping out everything else.
 - **Implied volatility is a price, not a forecast.** Inverting [[black-scholes]] for the $\sigma$ that reproduces a market price gives the implied vol. It systematically exceeds subsequent realised volatility — the **variance risk premium**, roughly 1–3 vol points on index options — because option sellers demand compensation for being short gamma into crashes. Implied also varies with strike and expiry (the smile), which is a direct statement that the constant-vol model is wrong.
-- **Volatility is tradable in its own right.** A delta-hedged option's P&L is $\tfrac12 \sum \Gamma S^2(r_t^2 - \sigma_{\text{imp}}^2 \Delta t)$ — realised variance against implied variance (see [[greeks]]). A **variance swap** pays $N(\sigma_R^2 - K^2)$ and is the natural instrument, because *variance*, not volatility, is what a static portfolio of options weighted $1/K^2$ plus a dynamic delta hedge replicates exactly (the log-contract argument). A volatility swap pays $\sqrt{\text{variance}}$, a concave function, so it requires a convexity adjustment and cannot be statically replicated — this is why the market quotes variance swaps and adjusts to get vol swaps.
+- **Volatility is tradable in its own right.** A delta-hedged option's P&L is $\tfrac12 \sum \Gamma S^2(r_t^2 - \sigma_{\text{impl}}^2 \Delta t)$ — realised variance against implied variance (see [[greeks]]). A **variance swap** pays $N(\sigma_R^2 - K^2)$ and is the natural instrument, because *variance*, not volatility, is what a static portfolio of options weighted $1/K^2$ plus a dynamic delta hedge replicates exactly (the log-contract argument). A volatility swap pays $\sqrt{\text{variance}}$, a concave function, so it requires a convexity adjustment and cannot be statically replicated — this is why the market quotes variance swaps and adjusts to get vol swaps.
 - **Risk limits and sizing.** Volatility is the $\sigma$ in parametric [[value-at-risk]], the scaling factor in vol-targeted strategies ($w_t \propto 1/\hat\sigma_t$), and the denominator of every Sharpe ratio.
-- **The stylised facts drive model choice.** Volatility **clusters** (large moves follow large moves — this is what GARCH captures); returns have **fat tails** even after conditioning; the **leverage effect** means negative returns raise future volatility more than positive ones of the same size (hence asymmetric models like GJR-GARCH and the equity skew); and volatility **mean-reverts**. Above all, volatility is far more forecastable than returns: an $R^2$ near $0$ for return prediction is normal, while $0.3$–$0.5$ for next-day variance is routine.
+- **The stylised facts drive model choice.** Volatility **clusters** (large moves follow large moves — this is what GARCH captures); returns have **fat tails** even after conditioning; the **leverage effect** means negative returns raise future volatility more than positive ones of the same size (hence asymmetric models like GJR-GARCH and the equity skew); and volatility **mean-reverts**. Above all, volatility is far more forecastable than returns: an $R^2$ near $0$ for return prediction is normal, while $0.3$–$0.5$ for next-day variance is routine when the target is a realised-variance proxy built from intraday data. Against the squared daily return as target the $R^2$ is under $0.05$, because that target is itself a very noisy proxy.
 
 ## Common Mistakes
 
 ::: pitfall Scaling a conditional volatility by $\sqrt{h}$
-The rule needs i.i.d. returns. Applied to a *current* GARCH or EWMA estimate during a stress episode it ignores mean reversion and overstates the 10-day number; applied in a calm period it understates it. Use $\mathbb{E}[\sigma_{t+k}^2\mid\mathcal{F}_t] = \sigma_\infty^2 + (\alpha+\beta)^k(\sigma_{t+1}^2 - \sigma_\infty^2)$ and sum over $k$, not a flat $\sqrt{10}$.
+The rule needs i.i.d. returns. Applied to a *current* GARCH or EWMA estimate during a stress episode it ignores mean reversion and overstates the 10-day number; applied in a calm period it understates it. Use $\mathbb{E}[\sigma_{t+k}^2\mid\mathcal{F}_t] = \sigma_\infty^2 + (\alpha+\beta)^{k-1}(\sigma_{t+1}^2 - \sigma_\infty^2)$ and sum over $k$, not a flat $\sqrt{10}$.
 :::
 
 ::: pitfall Annualising simple returns as if they added
@@ -192,7 +192,7 @@ Only log returns aggregate additively. Building a monthly volatility by scaling 
 :::
 
 ::: pitfall Reading a change in a volatility estimate as a change in volatility
-With a 21-day window the relative standard error is $1/\sqrt{42} \approx 15\%$. Realised vol moving from $18\%$ to $22\%$ is well within noise — before calling a regime change, ask whether the move exceeds roughly $2\hat\sigma/\sqrt{2n}$.
+With a 21-day window the relative standard error is $1/\sqrt{42} \approx 15\%$. Realised vol moving from $18\%$ to $22\%$ is well within noise — before calling a regime change, ask whether the move exceeds roughly $2\hat\sigma/\sqrt{n}$: comparing two independent windows doubles the variance of the difference, so the bar is $\sqrt{2}$ times one estimate's standard error, not one.
 :::
 
 ::: pitfall Comparing implied and realised volatility carelessly
@@ -267,6 +267,6 @@ Three problems.
 
 **Backward versus forward.** Trailing realised vol is a noisy estimate of the *past*; implied is a risk-neutral expectation over the *next* month. With a $\pm 15\%$ relative standard error at 21 days, a $15\%$ print is barely distinguishable from $17\%$. And if there is a known event in the window (earnings, a central-bank meeting), forward realised vol should be higher than trailing.
 
-**Which implied?** A single number hides the smile. The $19\%$ is at one strike; a delta-hedged short position's P&L is $\tfrac12\sum \Gamma S^2 (r_t^2 - \sigma_{\text{imp}}^2\Delta t)$, weighted by gamma, so it depends on *where* the underlying spends its time, not just on average realised variance. Selling a $19\%$ option and realising $16\%$ can still lose money if the moves happen where the gamma is concentrated.
+**Which implied?** A single number hides the smile. The $19\%$ is at one strike; a delta-hedged short position's P&L is $\tfrac12\sum \Gamma S^2 (r_t^2 - \sigma_{\text{impl}}^2\Delta t)$, weighted by gamma, so it depends on *where* the underlying spends its time, not just on average realised variance. Selling a $19\%$ option and realising $16\%$ can still lose money if the moves happen where the gamma is concentrated.
 :::
 :::
