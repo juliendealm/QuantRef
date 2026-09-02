@@ -1,0 +1,20 @@
+{
+  "name": "quantref",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Personal quantitative finance reference notes, built as a static site for GitHub Pages.",
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.js",
+    "new": "node scripts/new.js",
+    "serve": "node scripts/serve.js"
+  },
+  "dependencies": {
+    "gray-matter": "^4.0.3",
+    "katex": "^0.16.11",
+    "markdown-it": "^14.1.0",
+    "markdown-it-anchor": "^9.2.0",
+    "markdown-it-container": "^4.0.0",
+    "markdown-it-texmath": "^1.0.0"
+  }
+}
