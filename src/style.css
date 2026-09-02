@@ -323,9 +323,13 @@ button.linklike { font: inherit; font-size: 0.85rem; background: none; border: 0
 
 /* Responsive */
 @media (max-width: 960px) {
-  .concept-layout, .dash-layout { grid-template-columns: 1fr; }
-  .side, .dash-side { position: static; max-height: none; order: -1; }
+  /* minmax(0, 1fr), not 1fr: an auto minimum is min-content, which lets wide
+     code blocks and formulas blow the column past the viewport. */
+  .concept-layout, .dash-layout { grid-template-columns: minmax(0, 1fr); }
+  .side, .dash-side { position: static; max-height: none; }
+  .concept { max-width: none; }
   .side .toc, .side .edit { display: none; }
+  .side .tags { display: flex; flex-wrap: wrap; }
   .top { flex-wrap: wrap; gap: 0.6rem; }
   .search { order: 5; flex-basis: 100%; max-width: none; }
 }
