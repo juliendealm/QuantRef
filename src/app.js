@@ -555,28 +555,16 @@
       zoomAt(cx, cy, Math.exp(-e.deltaY * step));
     }, { passive: false });
 
+    // No setPointerCapture here: capturing the pointer on the svg retargets the
+    // click away from the node, which would stop a node click from opening its
+    // page. Track the drag on window listeners instead.
     const pointers = new Map();
-    let pinchDist = 0, panStart = null, moved = 0;
+    let pinchDist = 0, panStart = null;
 
-    svg.addEventListener("pointerdown", (e) => {
-      svg.setPointerCapture(e.pointerId);
-      pointers.set(e.pointerId, localPoint(e));
-      moved = 0;
-      dragged = false;
-      if (pointers.size === 1) {
-        const [x, y] = pointers.get(e.pointerId);
-        panStart = { x, y, tx, ty };
-        svg.classList.add("panning");
-      } else if (pointers.size === 2) {
-        const [a, b] = [...pointers.values()];
-        pinchDist = Math.hypot(a[0] - b[0], a[1] - b[1]);
-        panStart = null;
-      }
-    });
-    svg.addEventListener("pointermove", (e) => {
+    const onMove = (e) => {
       if (!pointers.has(e.pointerId)) return;
       pointers.set(e.pointerId, localPoint(e));
-      if (pointers.size === 2) {
+      if (pointers.size >= 2) {
         const [a, b] = [...pointers.values()];
         const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
         if (pinchDist > 0) zoomAt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, d / pinchDist);
@@ -586,24 +574,40 @@
       }
       if (!panStart) return;
       const [x, y] = pointers.get(e.pointerId);
-      moved = Math.max(moved, Math.hypot(x - panStart.x, y - panStart.y));
-      if (moved > 4) dragged = true;
+      if (Math.hypot(x - panStart.x, y - panStart.y) > 4) dragged = true;
+      if (!dragged) return; // below the threshold this is still a click, not a pan
       tx = panStart.tx + (x - panStart.x);
       ty = panStart.ty + (y - panStart.y);
       apply();
-    });
-    const endPointer = (e) => {
+    };
+    const onUp = (e) => {
       pointers.delete(e.pointerId);
       if (pointers.size < 2) pinchDist = 0;
-      if (pointers.size === 0) {
-        panStart = null;
-        svg.classList.remove("panning");
-        // Let the click that follows this pointerup see `dragged`, then clear it.
-        setTimeout(() => { dragged = false; }, 0);
-      }
+      if (pointers.size) return;
+      panStart = null;
+      svg.classList.remove("panning");
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+      // `dragged` stays set through the click that follows, and is cleared by
+      // the next pointerdown.
     };
-    svg.addEventListener("pointerup", endPointer);
-    svg.addEventListener("pointercancel", endPointer);
+    svg.addEventListener("pointerdown", (e) => {
+      pointers.set(e.pointerId, localPoint(e));
+      if (pointers.size === 1) {
+        dragged = false;
+        const [x, y] = pointers.get(e.pointerId);
+        panStart = { x, y, tx, ty };
+        svg.classList.add("panning");
+        window.addEventListener("pointermove", onMove);
+        window.addEventListener("pointerup", onUp);
+        window.addEventListener("pointercancel", onUp);
+      } else if (pointers.size === 2) {
+        const [a, b] = [...pointers.values()];
+        pinchDist = Math.hypot(a[0] - b[0], a[1] - b[1]);
+        panStart = null;
+      }
+    });
 
     document.querySelectorAll(".graph-controls button").forEach((b) =>
       b.addEventListener("click", () => {
