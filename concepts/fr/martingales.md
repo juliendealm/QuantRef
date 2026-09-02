@@ -11,15 +11,46 @@ related: [brownian-motion, black-scholes]
 
 ## Intuition
 
-Une martingale est un jeu équitable. Quoi qu'il se soit passé jusqu'ici, ta fortune espérée après le prochain tour est égale à ta fortune actuelle. Pas « le jeu a une moyenne nulle dans l'ensemble », mais conditionnellement à toute l'histoire : aucun motif du passé ne dit de quel côté penche le prochain pas.
+Une martingale est un jeu équitable : quoi qu'il se soit passé jusqu'ici, ta fortune espérée après le prochain tour est égale à ta fortune actuelle — pas « une moyenne nulle dans l'ensemble », mais conditionnellement à toute l'histoire. La conséquence est un énoncé d'absence de repas gratuit : aucune stratégie de mise choisissant son enjeu à partir du seul passé ne transforme une martingale en jeu à espérance positive, du moins pas en temps borné et à crédit borné. En finance, le jeu équitable n'est pas le prix de l'action sous $\mathbb{P}$ (les actions rémunèrent une prime de risque) mais le prix *actualisé* sous la mesure risque-neutre $\mathbb{Q}$, et tout le pricing de dérivés tient dans cet énoncé plus la propriété de tour de l'[[conditional-probability|espérance conditionnelle]].
 
-La conséquence qui compte est un énoncé d'absence de repas gratuit : aucune stratégie de mise qui choisit son enjeu à partir du seul passé ne peut transformer une martingale en jeu à espérance positive, du moins pas en temps borné et à crédit borné. C'est le contenu mathématique de « on ne bat pas un jeu équitable » et, après changement de mesure, de « on ne gagne pas d'argent sans risque sur un marché sans arbitrage ».
+## Formules clés
 
-En finance, le jeu équitable n'est pas le prix de l'action sous les probabilités réelles (les actions rémunèrent une prime de risque), mais le prix *actualisé* sous la mesure *risque-neutre* $\mathbb{Q}$. Tout le pricing de dérivés tient dans l'énoncé « les prix actualisés sont des $\mathbb{Q}$-martingales » plus la propriété de tour de l'[[conditional-probability|espérance conditionnelle]].
+| Nom | Formule |
+|---|---|
+| Martingale | $\mathbb{E}[M_t \mid \mathcal{F}_s] = M_s$, $s \le t$ |
+| Moyenne constante | $\mathbb{E}[M_t] = \mathbb{E}[M_0]$ |
+| Carré compensé | $W_t^2 - t$, $S_n^2 - n$ |
+| Martingale exponentielle | $\exp(\sigma W_t - \tfrac12 \sigma^2 t)$ |
+| Martingale de Doob | $M_t = \mathbb{E}[X \mid \mathcal{F}_t]$ |
+| Transformée de martingale | $G_n = \sum_{k \le n} H_k (M_k - M_{k-1})$, $H$ prévisible |
+| Arrêt optionnel | $\mathbb{E}[M_\tau] = \mathbb{E}[M_0]$ sous une condition d'arrêt |
+| Prix risque-neutre | $V_t = B_t\,\mathbb{E}^{\mathbb{Q}}[H / B_T \mid \mathcal{F}_t]$ |
+
+## Erreurs fréquentes
+
+::: pitfall Appliquer l'arrêt optionnel sans vérifier une condition
+« $\tau$ est fini p.s., donc $\mathbb{E}[M_\tau] = M_0$. » Faux : la stratégie de doublement et le premier temps d'atteinte de $+1$ ont tous deux $\tau < \infty$ p.s. et $\mathbb{E}[M_\tau] \ne M_0$. Vérifie un horizon borné, un processus arrêté borné, ou $\mathbb{E}[\tau]$ fini avec accroissements bornés.
+:::
+
+::: pitfall Croire que le prix de l'action est une martingale
+Sous $\mathbb{Q}$, c'est $S_t/B_t$ qui est une martingale, pas $S_t$ : $\mathbb{E}^{\mathbb{Q}}[S_T \mid \mathcal{F}_t] = S_t e^{r(T-t)}$. Sous $\mathbb{P}$, aucun des deux ne l'est ; la dérive excédentaire $\mu - r$ est la prime de risque.
+:::
+
+::: pitfall Oublier la filtration
+$\mathbb{E}[M_t \mid \mathcal{F}_s] = M_s$ est un énoncé sur un ensemble d'information précis. Le même processus peut ne plus être une martingale pour la filtration plus grande d'un initié, et une moyenne constante $\mathbb{E}[M_t] = \mathbb{E}[M_0]$ ne suffit pas à faire d'un processus une martingale.
+:::
+
+::: pitfall Confondre martingale locale et vraie martingale
+Écrire « $\int H\,dW$ est une martingale, donc son espérance est nulle » sans condition d'intégrabilité telle que $\mathbb{E}\int_0^t H_s^2\,ds < \infty$. Les martingales locales strictes existent et vérifient $\mathbb{E}[M_t] < M_0$.
+:::
+
+## Révision en 30 secondes
+
+Martingale : adaptée, intégrable, $\mathbb{E}[M_t \mid \mathcal{F}_s] = M_s$ ; sous $\ge$, sur $\le$. Exemples : marche aléatoire symétrique, $S_n^2 - n$, $W_t$, $W_t^2 - t$, $e^{\sigma W_t - \sigma^2 t/2}$, et $\mathbb{E}[X \mid \mathcal{F}_t]$ (Doob). Des mises prévisibles donnent une transformée de martingale, encore une martingale : aucune stratégie ne bat un jeu équitable. L'arrêt optionnel $\mathbb{E}[M_\tau] = \mathbb{E}[M_0]$ exige un horizon borné, un processus arrêté borné, ou $\mathbb{E}[\tau]$ fini avec accroissements bornés. Théorème fondamental : absence d'arbitrage $\iff$ les prix actualisés sont des martingales sous une $\mathbb{Q} \sim \mathbb{P}$, d'où $V_t = B_t\,\mathbb{E}^{\mathbb{Q}}[H/B_T \mid \mathcal{F}_t]$.
 
 ## Formulation mathématique
 
-Une **filtration** $(\mathcal{F}_t)_{t \ge 0}$ est une famille croissante de tribus, $\mathcal{F}_s \subseteq \mathcal{F}_t$ pour $s \le t$ : l'information disponible à l'instant $t$. Un processus $X$ est **adapté** si $X_t$ est $\mathcal{F}_t$-mesurable, c'est-à-dire si sa valeur en $t$ est connue en $t$.
+Une **filtration** $(\mathcal{F}_t)$ est une famille croissante de tribus, l'information disponible en $t$ ; un processus est **adapté** si $X_t$ est $\mathcal{F}_t$-mesurable.
 
 ::: formula Martingale
 Un processus adapté $(M_t)$ avec $\mathbb{E}|M_t| < \infty$ est une martingale par rapport à $(\mathcal{F}_t, \mathbb{P})$ si
@@ -29,9 +60,7 @@ $$
 C'est une **sous-martingale** si $\mathbb{E}[M_t \mid \mathcal{F}_s] \ge M_s$ et une **surmartingale** si $\mathbb{E}[M_t \mid \mathcal{F}_s] \le M_s$.
 :::
 
-En prenant l'espérance et en utilisant la propriété de tour, $\mathbb{E}[M_t] = \mathbb{E}[M_0]$ pour tout $t$. Une sous-martingale dérive vers le haut en moyenne, une surmartingale vers le bas (la fortune d'un joueur au casino est une surmartingale ; celle du casino est une sous-martingale). En temps discret, la condition se réduit à un pas : $\mathbb{E}[M_{n+1} \mid \mathcal{F}_n] = M_n$.
-
-**Exemples.** Soit $\xi_i$ i.i.d. avec $\mathbb{P}(\xi_i = \pm 1) = 1/2$, $S_n = \sum_{i \le n} \xi_i$, et $W$ un [[brownian-motion|mouvement brownien]] muni de sa filtration naturelle.
+D'où $\mathbb{E}[M_t] = \mathbb{E}[M_0]$ ; la fortune d'un joueur est une surmartingale, celle du casino une sous-martingale. En temps discret, un pas suffit. Avec $\xi_i$ i.i.d., $\mathbb{P}(\xi_i = \pm 1) = 1/2$, $S_n = \sum_{i \le n} \xi_i$ et $W$ un [[brownian-motion|mouvement brownien]] :
 
 | Processus | Type |
 |---|---|
@@ -45,7 +74,7 @@ En prenant l'espérance et en utilisant la propriété de tour, $\mathbb{E}[M_t]
 | $G_n = \sum_{k \le n} H_k (M_k - M_{k-1})$, $H$ prévisible et borné | martingale (transformée) |
 | $\varphi(M_t)$ avec $\varphi$ convexe, p. ex. $\lvert M_t \rvert$, $M_t^2$ | sous-martingale (Jensen) |
 
-« Prévisible » signifie que $H_k$ est $\mathcal{F}_{k-1}$-mesurable : la mise est choisie avant que le résultat ne soit révélé. La transformée $G_n$ est le P&L de la stratégie qui détient $H_k$ unités pendant la $k$-ième période.
+*Prévisible* signifie que $H_k$ est $\mathcal{F}_{k-1}$-mesurable — la mise est choisie avant le résultat — donc $G_n$ est le P&L de la détention de $H_k$ unités sur la période $k$.
 
 ::: formula Théorème d'arrêt optionnel
 Soit $M$ une martingale et $\tau$ un temps d'arrêt, c'est-à-dire $\{\tau \le n\} \in \mathcal{F}_n$ pour tout $n$. Alors $\mathbb{E}[M_\tau] = \mathbb{E}[M_0]$ dès que l'une des conditions suivantes est vérifiée :
@@ -54,7 +83,7 @@ Soit $M$ une martingale et $\tau$ un temps d'arrêt, c'est-à-dire $\{\tau \le n
 3. $\mathbb{E}[\tau] < \infty$ et $\mathbb{E}\big[\lvert M_{n+1} - M_n \rvert \,\big|\, \mathcal{F}_n\big] \le c$ (accroissements bornés).
 :::
 
-Le processus arrêté $M_{n \wedge \tau}$ est *toujours* une martingale ; ce qui peut échouer sans l'une de ces conditions, c'est le passage à la limite $n \to \infty$. Même énoncé en temps continu avec des trajectoires continues à droite.
+Le processus arrêté $M_{n \wedge \tau}$ est *toujours* une martingale ; ce qui échoue sans l'une de ces conditions, c'est le passage à la limite $n \to \infty$.
 
 ::: formula Théorème fondamental de l'évaluation des actifs
 En temps discret et avec un nombre fini de dates, un marché de numéraire $B_t$ (p. ex. $B_t = e^{rt}$) est sans arbitrage si et seulement s'il existe une mesure $\mathbb{Q}$ équivalente à $\mathbb{P}$ sous laquelle tout prix actualisé d'actif négocié $S_t / B_t$ est une $\mathbb{Q}$-martingale. (En temps continu, l'énoncé propre remplace « sans arbitrage » par NFLVR et « martingale » par sigma-martingale.) Alors, pour tout flux atteignable $H$ payé en $T$,
@@ -66,48 +95,46 @@ Le marché est complet (tout flux est réplicable) si et seulement si $\mathbb{Q
 
 ## Dérivation
 
-**$W_t^2 - t$ est une martingale.** Pour $s \le t$, on écrit $W_t = W_s + (W_t - W_s)$ ; l'accroissement est indépendant de $\mathcal{F}_s$, de moyenne $0$ et de variance $t - s$ :
+**$W_t^2 - t$.** L'accroissement $W_t - W_s$ est indépendant de $\mathcal{F}_s$, de moyenne $0$ et de variance $t - s$ :
 $$
 \mathbb{E}[W_t^2 \mid \mathcal{F}_s] = W_s^2 + 2W_s\,\mathbb{E}[W_t - W_s \mid \mathcal{F}_s] + \mathbb{E}[(W_t - W_s)^2 \mid \mathcal{F}_s] = W_s^2 + (t - s),
 $$
 donc $\mathbb{E}[W_t^2 - t \mid \mathcal{F}_s] = W_s^2 - s$. Le même calcul avec $\mathbb{E}[\xi^2] = 1$ donne $S_n^2 - n$.
 
-**Martingale exponentielle.** La fonction génératrice des moments gaussienne donne $\mathbb{E}[e^{\sigma(W_t - W_s)}] = e^{\sigma^2(t - s)/2}$, d'où
+**Martingale exponentielle.** À partir de $\mathbb{E}[e^{\sigma(W_t - W_s)}] = e^{\sigma^2(t - s)/2}$,
 $$
 \mathbb{E}\big[e^{\sigma W_t - \sigma^2 t/2} \,\big|\, \mathcal{F}_s\big] = e^{\sigma W_s - \sigma^2 t/2}\,\mathbb{E}\big[e^{\sigma (W_t - W_s)}\big] = e^{\sigma W_s - \sigma^2 s/2}.
 $$
 
-**Martingale de Doob.** Soit $M_t = \mathbb{E}[X \mid \mathcal{F}_t]$ avec $\mathbb{E}\lvert X \rvert < \infty$. Pour $s \le t$, la propriété de tour donne $\mathbb{E}[M_t \mid \mathcal{F}_s] = \mathbb{E}\big[\mathbb{E}[X \mid \mathcal{F}_t] \mid \mathcal{F}_s\big] = \mathbb{E}[X \mid \mathcal{F}_s] = M_s$, et $\mathbb{E}\lvert M_t \rvert \le \mathbb{E}\lvert X \rvert$. C'est le processus des prévisions successives de $X$ : les prévisions d'une quantité fixe forment un jeu équitable.
+**Doob.** Pour $M_t = \mathbb{E}[X \mid \mathcal{F}_t]$, la propriété de tour donne $\mathbb{E}[M_t \mid \mathcal{F}_s] = \mathbb{E}[X \mid \mathcal{F}_s] = M_s$ : les prévisions successives d'une quantité fixe forment un jeu équitable.
 
-**Transformée de martingale et arrêt optionnel.** Avec $H$ prévisible et borné, $\mathbb{E}[G_{n+1} - G_n \mid \mathcal{F}_n] = H_{n+1}\,\mathbb{E}[M_{n+1} - M_n \mid \mathcal{F}_n] = 0$, car $H_{n+1}$ est connu à l'instant $n$ et sort de l'espérance conditionnelle. Or
+**Transformée et arrêt.** $H_{n+1}$ est connu à l'instant $n$ et sort de l'espérance, donc $\mathbb{E}[G_{n+1} - G_n \mid \mathcal{F}_n] = 0$ ; et
 $$
 M_{n \wedge \tau} = M_0 + \sum_{k=1}^{n} \mathbf{1}_{\{\tau \ge k\}}\,(M_k - M_{k-1}), \qquad \{\tau \ge k\} = \{\tau \le k-1\}^c \in \mathcal{F}_{k-1},
 $$
-donc le processus arrêté est une transformée de martingale avec $H_k = \mathbf{1}_{\{\tau \ge k\}} \in \{0, 1\}$ et $\mathbb{E}[M_{n \wedge \tau}] = \mathbb{E}[M_0]$ pour tout $n$. Si $\tau \le N$, on prend $n = N$ : c'est la condition 1. Les conditions 2 et 3 sont exactement ce dont la convergence dominée a besoin pour passer de $\mathbb{E}[M_{n \wedge \tau}]$ à $\mathbb{E}[M_\tau]$ quand $n \to \infty$.
+fait de $M_{n \wedge \tau}$ une transformée avec $H_k \in \{0, 1\}$ prévisible, donc $\mathbb{E}[M_{n \wedge \tau}] = \mathbb{E}[M_0]$ pour tout $n$. La condition 1 prend $n = N$ ; les conditions 2 et 3 sont ce dont la convergence dominée a besoin pour atteindre $\mathbb{E}[M_\tau]$.
 
-**Pourquoi une mesure martingale exclut l'arbitrage.** Une stratégie autofinancée détenant $H_k$ unités de l'actif pendant la $k$-ième période a une richesse actualisée $\tilde{V}_n = V_0 + \sum_{k \le n} H_k(\tilde{S}_k - \tilde{S}_{k-1})$, transformée de martingale de $\tilde{S} = S/B$. Si $\tilde{S}$ est une $\mathbb{Q}$-martingale et $H$ est admissible, $\mathbb{E}^{\mathbb{Q}}[\tilde{V}_T] = V_0$. Un arbitrage aurait $V_0 = 0$, $\tilde{V}_T \ge 0$ et $\mathbb{P}(\tilde{V}_T > 0) > 0$ ; comme $\mathbb{Q} \sim \mathbb{P}$, la dernière inégalité vaut aussi sous $\mathbb{Q}$, donc $\mathbb{E}^{\mathbb{Q}}[\tilde{V}_T] > 0 = V_0$, contradiction. C'est le sens facile du théorème ; la réciproque (l'absence d'arbitrage implique l'existence d'une $\mathbb{Q}$) est un argument d'hyperplan séparateur. La formule de prix est alors la martingale de Doob : si $H$ est répliqué à partir du coût initial $V_0$, la richesse actualisée de réplication est une $\mathbb{Q}$-martingale qui termine en $\tilde{H}$, donc $\tilde{V}_t = \mathbb{E}^{\mathbb{Q}}[\tilde{H} \mid \mathcal{F}_t]$.
+**Absence d'arbitrage.** La richesse actualisée autofinancée $\tilde{V}_n = V_0 + \sum_{k \le n} H_k(\tilde{S}_k - \tilde{S}_{k-1})$ est une transformée de $\tilde{S} = S/B$, donc $\mathbb{E}^{\mathbb{Q}}[\tilde{V}_T] = V_0$ pour $H$ admissible. Un arbitrage ($V_0 = 0$, $\tilde{V}_T \ge 0$, $\mathbb{P}(\tilde{V}_T > 0) > 0$, que $\mathbb{Q} \sim \mathbb{P}$ transporte) donnerait $\mathbb{E}^{\mathbb{Q}}[\tilde{V}_T] > 0 = V_0$. La réciproque est un argument d'hyperplan séparateur, et le prix est la martingale de Doob, $\tilde{V}_t = \mathbb{E}^{\mathbb{Q}}[\tilde{H} \mid \mathcal{F}_t]$.
 
 ## Hypothèses et cas limites
 
 - **L'intégrabilité fait partie de la définition.** Une marche aléatoire à pas de Cauchy est symétrique mais n'a pas de moyenne, donc ce n'est pas une martingale.
-- **Martingale par rapport à quoi ?** La propriété dépend de la filtration *et* de la mesure. Sous $\mathbb{P}$, l'action actualisée est une sous-martingale quand $\mu > r$ ; sous $\mathbb{Q}$, c'est une martingale ; le prix non actualisé $S_t$ a une $\mathbb{Q}$-dérive $r$, donc c'est une $\mathbb{Q}$-sous-martingale lorsque $r \ge 0$. Agrandir la filtration (un initié avec $\mathcal{G}_t \supsetneq \mathcal{F}_t$) peut détruire la propriété.
-- **Martingale n'est ni « accroissements indépendants » ni « Markov ».** $\int_0^t H_s\,dW_s$ avec $H$ adapté est une martingale à accroissements dépendants ; un processus de Markov avec dérive n'est pas une martingale.
-- **L'arrêt optionnel échoue sans ses conditions.** La stratégie de doublement a des mises non bornées et une richesse arrêtée non bornée inférieurement ; le premier temps d'atteinte $\tau_1$ de $+1$ par la marche symétrique est fini p.s. mais $\mathbb{E}[S_{\tau_1}] = 1 \ne 0$, parce que $\mathbb{E}[\tau_1] = \infty$.
-- **Martingales locales.** Les intégrales stochastiques ne sont en général que des martingales *locales* (martingales jusqu'à une suite de temps d'arrêt). Une martingale locale stricte peut avoir une espérance décroissante, le modèle mathématique d'une bulle de prix. $\exp(\sigma W_t - \sigma^2 t/2)$ est une vraie martingale pour $\sigma$ constant (critère de Novikov), ce qui rend légitime le changement de mesure de Girsanov dans [[black-scholes]].
-- **Technicités du temps continu.** Les trajectoires sont continues à droite avec limites à gauche et la filtration satisfait les conditions habituelles ; sans cela, temps d'arrêt et arrêt optionnel se comportent mal.
-- **Les images convexes sont des sous-martingales.** Par Jensen, $\varphi(M_t)$ est une sous-martingale pour $\varphi$ convexe quand elle est intégrable : $\lvert M_t \rvert$, $M_t^2$, $e^{M_t}$. C'est pourquoi $W_t^2$ a besoin du compensateur $-t$.
+- **Par rapport à quoi ?** La propriété dépend de la filtration *et* de la mesure. Sous $\mathbb{P}$, l'action actualisée est une sous-martingale quand $\mu > r$ ; sous $\mathbb{Q}$, une martingale ; le prix non actualisé $S_t$ a une $\mathbb{Q}$-dérive $r$, donc c'est une $\mathbb{Q}$-sous-martingale lorsque $r \ge 0$. La filtration plus grande d'un initié, $\mathcal{G}_t \supsetneq \mathcal{F}_t$, peut détruire la propriété.
+- **Ni « accroissements indépendants » ni « Markov ».** $\int_0^t H_s\,dW_s$ a des accroissements dépendants ; un processus de Markov avec dérive n'est pas une martingale.
+- **L'arrêt optionnel échoue sans ses conditions.** Le temps d'atteinte $\tau_1$ de $+1$ par la marche symétrique est fini p.s. mais $\mathbb{E}[S_{\tau_1}] = 1 \ne 0$, parce que $\mathbb{E}[\tau_1] = \infty$.
+- **Martingales locales.** Les intégrales stochastiques ne sont en général que des martingales *locales*, et une martingale locale stricte peut avoir une espérance décroissante : le modèle d'une bulle de prix. $\exp(\sigma W_t - \sigma^2 t/2)$ est une vraie martingale pour $\sigma$ constant (Novikov), ce qui légitime Girsanov dans [[black-scholes]].
+- **Temps continu.** Les trajectoires sont càdlàg et la filtration satisfait les conditions habituelles ; sans cela, les temps d'arrêt se comportent mal.
+- **Images convexes.** Par Jensen, $\varphi(M_t)$ est une sous-martingale quand elle est intégrable : $\lvert M_t \rvert$, $M_t^2$, $e^{M_t}$. D'où le compensateur $-t$ dans $W_t^2 - t$.
 
 ## Exemple détaillé
 
-La stratégie de mise par doublement (dite « martingale »). On lance une pièce équilibrée, on mise 1, on double la mise après chaque perte, on s'arrête à la première victoire. Si la première victoire arrive au tour $\tau$, on a perdu $1 + 2 + \cdots + 2^{\tau - 2} = 2^{\tau - 1} - 1$ et on gagne $2^{\tau - 1}$ : net $+1$. Comme $\mathbb{P}(\tau = k) = 2^{-k}$, $\tau < \infty$ p.s. et $\mathbb{E}[\tau] = 2$. La richesse arrêtée vaut donc $V_\tau = 1$ presque sûrement alors que $V_0 = 0$ : « un profit certain tiré d'un jeu équitable ».
+La stratégie de doublement (dite « martingale ») : miser 1 sur une pièce équilibrée, doubler après chaque perte, s'arrêter à la première victoire. Si la victoire arrive au tour $\tau$, on a perdu $2^{\tau - 1} - 1$ et on gagne $2^{\tau - 1}$ : net $+1$. Comme $\mathbb{P}(\tau = k) = 2^{-k}$, $\mathbb{E}[\tau] = 2$ et $V_\tau = 1$ presque sûrement alors que $V_0 = 0$ — « un profit certain tiré d'un jeu équitable ».
 
-La richesse $V_n = \sum_{k \le n} H_k \xi_k$ avec $H_k = 2^{k-1}\mathbf{1}_{\{\tau \ge k\}}$ *est* une martingale (mises prévisibles), donc le piège est dans l'arrêt optionnel : $\mathbb{E}[\tau] = 2 < \infty$ mais les accroissements $2^{k-1}$ ne sont pas bornés (la condition 3 échoue), et $V_{n \wedge \tau}$ n'est pas bornée inférieurement (la condition 2 échoue). Les mathématiques sont justes ; la stratégie exige un crédit illimité.
-
-Imposons un horizon borné $N$, ce qui revient à une ligne de crédit de $2^N - 1$. Alors la condition 1 est vérifiée et $\mathbb{E}[V_{\tau \wedge N}] = 0$. Directement :
+La richesse $V_n = \sum_{k \le n} H_k \xi_k$ avec $H_k = 2^{k-1}\mathbf{1}_{\{\tau \ge k\}}$ *est* une martingale (mises prévisibles), donc le piège est dans l'arrêt optionnel : les accroissements $2^{k-1}$ ne sont pas bornés (la condition 3 échoue) et $V_{n \wedge \tau}$ n'est pas bornée inférieurement (la condition 2 échoue). Un horizon borné $N$, soit une ligne de crédit de $2^N - 1$, rétablit la condition 1 :
 $$
 \mathbb{E}[V_{\tau \wedge N}] = (1 - 2^{-N}) \cdot 1 + 2^{-N} \cdot \big(-(2^N - 1)\big) = 1 - 2^{-N} - 1 + 2^{-N} = 0.
 $$
-Avec $N = 10$ : on gagne $1$ avec probabilité $0{,}999$, on perd $1\,023$ avec probabilité $0{,}001$. Moyenne nulle, médiane $+1$, et une queue gauche épaisse, la signature exacte d'une stratégie vendeuse de volatilité.
+Avec $N = 10$ : on gagne $1$ avec probabilité $0{,}999$, on perd $1\,023$ avec probabilité $0{,}001$ — moyenne nulle, médiane $+1$, queue gauche épaisse : un profil vendeur de volatilité.
 
 ```python
 import numpy as np
@@ -150,51 +177,16 @@ E[S_10] = +0.0026,  E[S_10^2] = 10.009  (exact 10)
 ```
 :::
 
-La richesse moyenne reste à zéro à chaque instant intermédiaire (le processus arrêté est une martingale tout du long), la probabilité de gain correspond à $1 - 2^{-10}$, et la moyenne à l'arrêt est nulle à une erreur standard près. Cette erreur standard est grande ($0{,}07$ avec $200\,000$ trajectoires) parce que la richesse arrêtée a un écart-type d'environ $32$ : toute la variance est logée dans la perte de $1\,023$ qui arrive une fois sur mille.
+La moyenne reste à zéro à chaque instant intermédiaire et à l'arrêt, à une erreur standard près. Cette erreur est grande ($0{,}07$ avec $200\,000$ trajectoires) parce que la richesse arrêtée a un écart-type d'environ $32$ : toute la variance est logée dans la perte de $1\,023$ qui arrive une fois sur mille.
 
 ## Pourquoi c'est important en finance quantitative
 
-- **Pricing risque-neutre.** [[black-scholes]], c'est le théorème fondamental avec $\tilde{S}_t = S_0\exp(\sigma W^{\mathbb{Q}}_t - \sigma^2 t/2)$, la martingale exponentielle. Tout prix de dérivé vaut $B_t\,\mathbb{E}^{\mathbb{Q}}[H/B_T \mid \mathcal{F}_t]$, et le portefeuille delta-couvert est la transformée de martingale de réplication.
-- **Marchés efficients.** Le « properly anticipated prices fluctuate randomly » de Samuelson : sous la mesure de pricing, les prix actualisés sont des martingales ; sous $\mathbb{P}$, l'écart à une martingale est la prime de risque. Les tests de prévisibilité des rendements demandent si $\mathbb{E}[r_{t+1} \mid \mathcal{F}_t]$ est constante, c'est-à-dire si les rendements forment une martingale plus une dérive constante.
-- **Les stratégies de trading sont des transformées de martingale.** P&L $= \sum_k H_k\,\Delta S_k$ avec $H$ prévisible. Si $\Delta S$ est une différence de martingale, aucun $H$ prévisible borné n'a de P&L espéré positif : pas d'avantage de timing sans information hors de $\mathcal{F}_t$.
-- **Le [[brownian-motion|mouvement brownien]]** est la martingale continue canonique, et la caractérisation de Lévy dit que toute martingale locale continue $M$ telle que $M_0 = 0$ et de variation quadratique $[M]_t = t$ *est* un mouvement brownien. Les intégrales stochastiques sont des martingales locales, et la [[ito-lemma|formule d'Itô]] est l'outil pour trouver le compensateur qui fait de $f(W_t)$ une martingale.
-- **Filtrage.** Les innovations $y_t - \mathbb{E}[y_t \mid \mathcal{F}_{t-1}]$ d'un [[kalman-filter|filtre de Kalman]] forment une suite de différences de martingale, et l'estimation filtrée d'une quantité fixe est une martingale de Doob.
-- **Bornes de drawdown.** L'inégalité maximale de Doob, $\mathbb{P}(\max_{s \le t} M_s \ge \lambda) \le \mathbb{E}[M_t^+]/\lambda$, borne la probabilité qu'un jeu équitable atteigne un jour un niveau, donc la probabilité de toucher un stop-loss avant $t$.
-
-## Erreurs fréquentes
-
-::: pitfall Appliquer l'arrêt optionnel sans vérifier une condition
-« $\tau$ est fini p.s., donc $\mathbb{E}[M_\tau] = M_0$. » Faux : la stratégie de doublement et le premier temps d'atteinte de $+1$ ont tous deux $\tau < \infty$ p.s. et $\mathbb{E}[M_\tau] \ne M_0$. Vérifie un horizon borné, un processus arrêté borné, ou $\mathbb{E}[\tau]$ fini avec accroissements bornés.
-:::
-
-::: pitfall Croire que le prix de l'action est une martingale
-Sous $\mathbb{Q}$, c'est $S_t/B_t$ qui est une martingale, pas $S_t$ : $\mathbb{E}^{\mathbb{Q}}[S_T \mid \mathcal{F}_t] = S_t e^{r(T-t)}$. Sous $\mathbb{P}$, aucun des deux ne l'est ; la dérive excédentaire $\mu - r$ est la prime de risque.
-:::
-
-::: pitfall Oublier la filtration
-$\mathbb{E}[M_t \mid \mathcal{F}_s] = M_s$ est un énoncé sur un ensemble d'information précis. Le même processus peut ne plus être une martingale pour la filtration plus grande d'un initié, et une moyenne constante $\mathbb{E}[M_t] = \mathbb{E}[M_0]$ ne suffit pas à faire d'un processus une martingale.
-:::
-
-::: pitfall Confondre martingale locale et vraie martingale
-Écrire « $\int H\,dW$ est une martingale, donc son espérance est nulle » sans condition d'intégrabilité telle que $\mathbb{E}\int_0^t H_s^2\,ds < \infty$. Les martingales locales strictes existent et vérifient $\mathbb{E}[M_t] < M_0$.
-:::
-
-## Révision en 30 secondes
-
-Martingale : adaptée, intégrable, $\mathbb{E}[M_t \mid \mathcal{F}_s] = M_s$ ; sous $\ge$, sur $\le$. Exemples : marche aléatoire symétrique, $S_n^2 - n$, $W_t$, $W_t^2 - t$, $e^{\sigma W_t - \sigma^2 t/2}$, et $\mathbb{E}[X \mid \mathcal{F}_t]$ (Doob, par la propriété de tour). Des mises prévisibles donnent une transformée de martingale, encore une martingale : aucune stratégie ne bat un jeu équitable. L'arrêt optionnel $\mathbb{E}[M_\tau] = \mathbb{E}[M_0]$ exige un horizon borné, un processus arrêté borné, ou $\mathbb{E}[\tau]$ fini avec accroissements bornés ; la stratégie de doublement est ce qui arrive sans. Théorème fondamental : absence d'arbitrage $\iff$ les prix actualisés sont des martingales sous une $\mathbb{Q} \sim \mathbb{P}$, d'où $V_t = B_t\,\mathbb{E}^{\mathbb{Q}}[H/B_T \mid \mathcal{F}_t]$.
-
-## Formules clés
-
-| Nom | Formule |
-|---|---|
-| Martingale | $\mathbb{E}[M_t \mid \mathcal{F}_s] = M_s$, $s \le t$ |
-| Moyenne constante | $\mathbb{E}[M_t] = \mathbb{E}[M_0]$ |
-| Carré compensé | $W_t^2 - t$, $S_n^2 - n$ |
-| Martingale exponentielle | $\exp(\sigma W_t - \tfrac12 \sigma^2 t)$ |
-| Martingale de Doob | $M_t = \mathbb{E}[X \mid \mathcal{F}_t]$ |
-| Transformée de martingale | $G_n = \sum_{k \le n} H_k (M_k - M_{k-1})$, $H$ prévisible |
-| Arrêt optionnel | $\mathbb{E}[M_\tau] = \mathbb{E}[M_0]$ sous une condition d'arrêt |
-| Prix risque-neutre | $V_t = B_t\,\mathbb{E}^{\mathbb{Q}}[H / B_T \mid \mathcal{F}_t]$ |
+- **Pricing risque-neutre.** [[black-scholes]], c'est le théorème fondamental avec $\tilde{S}_t = S_0\exp(\sigma W^{\mathbb{Q}}_t - \sigma^2 t/2)$ ; le portefeuille delta-couvert est la transformée de réplication.
+- **Marchés efficients.** Sous $\mathbb{P}$, l'écart à une martingale est la prime de risque ; les tests de prévisibilité demandent si $\mathbb{E}[r_{t+1} \mid \mathcal{F}_t]$ est constante.
+- **Les stratégies sont des transformées de martingale.** Aucun $H$ prévisible borné n'a de P&L espéré $\sum_k H_k\,\Delta S_k$ positif contre une différence de martingale : pas d'avantage de timing sans information hors de $\mathcal{F}_t$.
+- **Le [[brownian-motion|mouvement brownien]]** est la martingale continue canonique ; la caractérisation de Lévy dit que toute martingale locale continue $M$ telle que $M_0 = 0$ et $[M]_t = t$ en *est* un. La [[ito-lemma|formule d'Itô]] fournit le compensateur qui fait de $f(W_t)$ une martingale.
+- **Filtrage.** Les innovations $y_t - \mathbb{E}[y_t \mid \mathcal{F}_{t-1}]$ d'un [[kalman-filter|filtre de Kalman]] forment une suite de différences de martingale.
+- **Drawdowns.** L'inégalité maximale de Doob, $\mathbb{P}(\max_{s \le t} M_s \ge \lambda) \le \mathbb{E}[M_t^+]/\lambda$, borne la probabilité de toucher un stop-loss avant $t$.
 
 ## Questions d'entretien
 
@@ -203,7 +195,7 @@ Martingale : adaptée, intégrable, $\mathbb{E}[M_t \mid \mathcal{F}_s] = M_s$ ;
 Calcule $\mathbb{E}[S_{n+1}^2 \mid \mathcal{F}_n]$ en utilisant $S_{n+1} = S_n + \xi_{n+1}$.
 :::
 ::: answer
-$\mathbb{E}[S_{n+1}^2 \mid \mathcal{F}_n] = S_n^2 + 2S_n\,\mathbb{E}[\xi_{n+1}] + \mathbb{E}[\xi_{n+1}^2] = S_n^2 + 1 > S_n^2$, donc $S_n^2$ est une sous-martingale stricte (Jensen avec $x \mapsto x^2$). En retirant la dérive, $S_n^2 - n$ est une martingale. L'analogue continu est $W_t^2 - t$ ; le « $-n$ » est la variation quadratique de la marche.
+$\mathbb{E}[S_{n+1}^2 \mid \mathcal{F}_n] = S_n^2 + 2S_n\,\mathbb{E}[\xi_{n+1}] + \mathbb{E}[\xi_{n+1}^2] = S_n^2 + 1$, donc $S_n^2$ est une sous-martingale stricte (Jensen avec $x \mapsto x^2$). En retirant la dérive, $S_n^2 - n$ est une martingale ; le « $-n$ » est la variation quadratique de la marche, et $W_t^2 - t$ est l'analogue continu.
 :::
 :::
 
@@ -212,7 +204,7 @@ $\mathbb{E}[S_{n+1}^2 \mid \mathcal{F}_n] = S_n^2 + 2S_n\,\mathbb{E}[\xi_{n+1}] 
 Applique l'arrêt optionnel à $S_n$ et à $S_n^2 - n$. La fortune arrêtée vit dans $[0, N]$.
 :::
 ::: answer
-Soit $\tau$ le temps de sortie. $\tau < \infty$ p.s. et $\mathbb{E}[\tau] < \infty$ : tout bloc de $N$ piles consécutifs termine le jeu, et le nombre de blocs nécessaires est géométrique. La marche arrêtée est bornée par $N$, donc la condition 2 donne $\mathbb{E}[S_\tau] = x$, soit $N p_N + 0 \cdot (1 - p_N) = x$ et $p_N = x/N$. Pour $S_n^2 - n$, le processus arrêté n'est pas borné (à cause du $-n$), mais $\mathbb{E}[\tau] < \infty$ et les accroissements $\lvert 2 S_n \xi_{n+1} \rvert \le 2N$ sont bornés avant $\tau$, donc la condition 3 s'applique : $\mathbb{E}[S_\tau^2] - \mathbb{E}[\tau] = x^2$, d'où $\mathbb{E}[\tau] = N^2 \cdot x/N - x^2 = x(N - x)$. De $x = 50$ à $N = 100$ : $2\,500$ mises en moyenne.
+$\mathbb{E}[\tau] < \infty$ : tout bloc de $N$ piles consécutifs termine le jeu et le nombre de blocs est géométrique. La marche arrêtée est bornée par $N$, donc la condition 2 donne $\mathbb{E}[S_\tau] = x$, soit $N p_N = x$ et $p_N = x/N$. Pour $S_n^2 - n$, le processus arrêté n'est pas borné (à cause du $-n$), mais les accroissements $\lvert 2 S_n \xi_{n+1} \rvert \le 2N$ sont bornés avant $\tau$, donc la condition 3 donne $\mathbb{E}[S_\tau^2] - \mathbb{E}[\tau] = x^2$ et $\mathbb{E}[\tau] = N^2 \cdot x/N - x^2 = x(N - x)$. De $x = 50$ à $N = 100$ : $2\,500$ mises.
 :::
 :::
 
@@ -221,7 +213,7 @@ Soit $\tau$ le temps de sortie. $\tau < \infty$ p.s. et $\mathbb{E}[\tau] < \inf
 Découpe $W_t = W_s + (W_t - W_s)$ et utilise la fonction génératrice des moments d'une gaussienne, $\mathbb{E}[e^{\lambda Z}] = e^{\lambda^2/2}$ pour $Z \sim N(0, 1)$.
 :::
 ::: answer
-$\mathbb{E}[M_t \mid \mathcal{F}_s] = e^{\sigma W_s - \sigma^2 t/2}\,\mathbb{E}[e^{\sigma(W_t - W_s)}] = e^{\sigma W_s - \sigma^2 t/2}\,e^{\sigma^2 (t-s)/2} = M_s$, et $\mathbb{E}[M_t] = 1 < \infty$. Sous $\mathbb{Q}$, $S_t = S_0\,e^{(r - \sigma^2/2)t + \sigma W^{\mathbb{Q}}_t}$, donc $e^{-rt} S_t = S_0 M_t$ : l'action actualisée est exactement cette martingale, ce qui est la condition du théorème fondamental dans [[black-scholes]]. Le même processus avec $\sigma$ remplacé par $-\lambda$ (moins le prix de marché du risque) est la densité $d\mathbb{Q}/d\mathbb{P}$ sur $\mathcal{F}_t$ dans le théorème de Girsanov.
+$\mathbb{E}[M_t \mid \mathcal{F}_s] = e^{\sigma W_s - \sigma^2 t/2}\,e^{\sigma^2 (t-s)/2} = M_s$, et $\mathbb{E}[M_t] = 1 < \infty$. Sous $\mathbb{Q}$, $S_t = S_0\,e^{(r - \sigma^2/2)t + \sigma W^{\mathbb{Q}}_t}$, donc $e^{-rt} S_t = S_0 M_t$ : l'action actualisée est exactement cette martingale, la condition du théorème fondamental dans [[black-scholes]]. Avec $\sigma$ remplacé par $-\lambda$ (moins le prix de marché du risque), c'est la densité de Girsanov $d\mathbb{Q}/d\mathbb{P}$ sur $\mathcal{F}_t$.
 :::
 :::
 
@@ -230,6 +222,6 @@ $\mathbb{E}[M_t \mid \mathcal{F}_s] = e^{\sigma W_s - \sigma^2 t/2}\,\mathbb{E}[
 Suppose $\mathbb{E}[\tau_1] < \infty$ et demande-toi quelle condition d'arrêt optionnel serait alors vérifiée.
 :::
 ::: answer
-Supposons $\mathbb{E}[\tau_1] < \infty$. Les accroissements de $S_n$ sont bornés par $1$, donc la condition 3 s'applique et donne $\mathbb{E}[S_{\tau_1}] = S_0 = 0$. Mais $S_{\tau_1} = 1$ presque sûrement, donc $\mathbb{E}[S_{\tau_1}] = 1$ : contradiction. Donc $\mathbb{E}[\tau_1] = \infty$. La stratégie « miser $1$ à chaque tour et s'arrêter dès qu'on est à $+1$ » est un gain certain de durée espérée infinie, avec des drawdowns non bornés en chemin : par la formule de la ruine du joueur, $\mathbb{P}(\text{drawdown} \ge k \text{ avant le gain}) = 1/(k+1)$, dont la somme diverge. La stratégie de doublement échange le temps d'attente infini contre un besoin de crédit infini ($\mathbb{E}[\tau] = 2$, mises non bornées). Dans les deux cas, un jeu équitable ne se bat pas en temps fini *et* à capital fini, ce que la condition d'admissibilité (richesse bornée inférieurement) impose dans le théorème fondamental.
+Supposons $\mathbb{E}[\tau_1] < \infty$. Les accroissements de $S_n$ sont bornés par $1$, donc la condition 3 donne $\mathbb{E}[S_{\tau_1}] = S_0 = 0$ ; mais $S_{\tau_1} = 1$ presque sûrement. Donc $\mathbb{E}[\tau_1] = \infty$. « Miser $1$ à chaque tour et s'arrêter dès qu'on est à $+1$ » est un gain certain de durée espérée infinie, avec des drawdowns non bornés : par la ruine du joueur, $\mathbb{P}(\text{drawdown} \ge k \text{ avant le gain}) = 1/(k+1)$, dont la somme diverge. La stratégie de doublement échange cette attente infinie contre un crédit infini ($\mathbb{E}[\tau] = 2$, mises non bornées). Dans les deux cas, un jeu équitable ne se bat pas en temps fini *et* à capital fini — ce que la condition d'admissibilité (richesse bornée inférieurement) impose dans le théorème fondamental.
 :::
 :::

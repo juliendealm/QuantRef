@@ -11,13 +11,44 @@ related: [volatility, linear-regression]
 
 ## Intuition
 
-La moyenne dit où se situe une variable aléatoire ; la variance dit de combien elle s'en écarte d'habitude. On prend l'écart $X - \mu$, on l'élève au carré pour que les excursions positives et négatives comptent toutes les deux comme de la dispersion, et on fait la moyenne : c'est la variance.
+La moyenne dit où se situe une variable aléatoire ; la variance dit de combien elle s'en écarte d'habitude. On prend l'écart $X - \mu$, on l'élève au carré pour que les excursions positives et négatives comptent toutes deux comme de la dispersion, et on fait la moyenne.
 
-Le carré n'est pas un choix arbitraire. Il rend la variance **additive** entre sources de hasard indépendantes, et il fait de la moyenne le point qui la minimise — $\mathbb{E}[(X-c)^2]$ est minimal en $c = \mu$. Ces deux propriétés expliquent pourquoi c'est la variance, et non l'écart absolu moyen pourtant plus naturel, qui se trouve sous les moindres carrés, l'optimisation de portefeuille et le théorème central limite.
+Le carré n'est pas arbitraire : il rend la variance **additive** entre sources de hasard indépendantes, et fait de la moyenne le point qui la minimise. D'où la variance, et non l'écart absolu moyen, sous les moindres carrés, l'optimisation de portefeuille et le théorème central limite. Sa racine, l'**écart-type**, revient dans les unités du rendement — pour des rendements, la [[volatility|volatilité]]. On calcule la variance et on cote la volatilité.
 
-Le prix du carré est un changement d'unité. Si $X$ est un rendement en pourcentage, $\operatorname{Var}(X)$ est en pourcentage au carré, ce que personne ne sait lire. La racine carrée donne l'**écart-type**, de retour dans les unités du rendement — et pour des rendements ce nombre a son propre nom, la [[volatility|volatilité]].
+## Formules clés
 
-En finance, la variance est l'objet que l'on calcule ; la volatilité est l'objet que l'on cote.
+| Nom | Formule |
+|---|---|
+| Définition | $\operatorname{Var}(X) = \mathbb{E}[(X-\mu)^2] = \mathbb{E}[X^2] - \mu^2$ |
+| Application affine | $\operatorname{Var}(aX + b) = a^2\operatorname{Var}(X)$ |
+| Somme | $\operatorname{Var}(X+Y) = \operatorname{Var}(X) + \operatorname{Var}(Y) + 2\operatorname{Cov}(X,Y)$ |
+| Corrélation | $\rho_{XY} = \operatorname{Cov}(X,Y)/(\sigma_X\sigma_Y) \in [-1,1]$ |
+| Portefeuille | $\sigma_p^2 = w^\top\Sigma w$ |
+| Poids égaux | $\sigma_p^2 = \dfrac{\sigma^2}{n} + \Big(1-\dfrac1n\Big)\rho\sigma^2 \;\to\; \rho\sigma^2$ |
+| Variance empirique | $s^2 = \dfrac{1}{n-1}\sum_i (X_i-\bar X)^2$ |
+| Variance totale | $\operatorname{Var}(X) = \mathbb{E}[\operatorname{Var}(X\mid Y)] + \operatorname{Var}(\mathbb{E}[X\mid Y])$ |
+
+## Erreurs fréquentes
+
+::: pitfall Calculer la variance par $\mathbb{E}[X^2] - \mathbb{E}[X]^2$ sur des niveaux bruts
+Sur une série de moyenne $10^4$ et d'écart-type $1$, les deux termes coïncident sur huit chiffres significatifs alors que la double précision en offre seize — on perd la moitié de ses chiffres, la simple précision tous. Centre d'abord, ou utilise Welford. Une « variance négative » en production, c'est presque toujours ce bug.
+:::
+
+::: pitfall Lire une corrélation nulle comme une indépendance
+La corrélation ne détecte que la partie linéaire d'une relation. Un livre d'options delta-couvert a par construction une corrélation quasi nulle avec le sous-jacent, et reste pourtant un pari sur lui via le gamma. Regarde d'abord les nuages de points, les corrélations de rang ou la dépendance de queue.
+:::
+
+::: pitfall Croire qu'une variance sans biais donne une volatilité sans biais
+$s^2$ est sans biais pour $\sigma^2$, mais $\sqrt{\cdot}$ est strictement concave, donc Jensen donne $\mathbb{E}[s] < \sqrt{\mathbb{E}[s^2]} = \sigma$ : l'estimateur usuel **sous**-estime la volatilité, d'environ $\sigma/(4n)$ sous hypothèse normale. Le $n-1$ ne le corrige pas.
+:::
+
+::: pitfall Traiter la variance comme une mesure de risque complète
+Une journée à $+10\%$ et une journée à $-10\%$ contribuent identiquement, alors qu'une seule inquiète un risk manager. Elle suppose aussi un moment d'ordre deux fini, ce que les modèles à queues épaisses cassent délibérément. Associe-la à une mesure de baisse (semi-variance, expected shortfall) dès que le payoff est asymétrique.
+:::
+
+## Révision en 30 secondes
+
+$\operatorname{Var}(X) = \mathbb{E}[(X-\mu)^2] = \mathbb{E}[X^2] - \mu^2$ — numériquement, la première forme, jamais la seconde sur des niveaux bruts. $\operatorname{Var}(aX+b) = a^2\operatorname{Var}(X)$ ; les variances s'additionnent quand les covariances s'annulent. Le risque de portefeuille vaut $w^\top\Sigma w$ ; à $n$ poids égaux, $\sigma^2/n + (1-1/n)\rho\sigma^2$, donc la diversification s'arrête à $\sigma\sqrt{\rho}$. La variance empirique divise par $n-1$, mais sa racine reste biaisée vers le bas. Variance totale : moyenne intra-groupe plus dispersion inter-groupes. La variance est symétrique et exige un moment d'ordre deux fini — jamais toute l'histoire du risque.
 
 ## Formulation mathématique
 
@@ -28,13 +59,13 @@ $$
 définie dès que $\mathbb{E}[X^2] < \infty$. L'écart-type vaut $\sigma = \sqrt{\operatorname{Var}(X)}$.
 :::
 
-Les transformations affines la remettent à l'échelle de façon quadratique et ignorent les translations :
+Les applications affines la remettent à l'échelle quadratiquement et ignorent les translations :
 
 $$
 \operatorname{Var}(aX + b) = a^2 \operatorname{Var}(X).
 $$
 
-Pour deux variables, la **covariance** mesure le co-mouvement et la **corrélation** le normalise :
+La **covariance** mesure le co-mouvement, la **corrélation** le normalise :
 
 ::: formula Covariance et corrélation
 $$
@@ -52,7 +83,7 @@ $$
 \operatorname{Var}\Big(\sum_i X_i\Big) = \sum_i \sum_j \operatorname{Cov}(X_i, X_j).
 $$
 
-L'indépendance donne $\operatorname{Cov}(X,Y) = 0$ donc l'additivité, mais **la non-corrélation suffit** : l'additivité ne demande que l'annulation de la covariance, pas l'indépendance complète.
+L'indépendance donne $\operatorname{Cov}(X,Y) = 0$ donc l'additivité, mais **la non-corrélation suffit** : l'additivité ne demande que l'annulation de la covariance.
 
 Pour un portefeuille de poids $w \in \mathbb{R}^n$ et de matrice de covariance $\Sigma$ :
 
@@ -63,9 +94,7 @@ $$
 et pour deux actifs $\;\sigma_p^2 = w_1^2\sigma_1^2 + w_2^2\sigma_2^2 + 2w_1w_2\rho\,\sigma_1\sigma_2$.
 :::
 
-$\Sigma$ est symétrique semi-définie positive précisément parce que $w^\top \Sigma w$ est une variance et qu'une variance ne peut pas être négative.
-
-Enfin, conditionner scinde la variance en deux morceaux :
+$\Sigma$ est symétrique semi-définie positive précisément parce que $w^\top \Sigma w$ est une variance. Conditionner scinde la variance en deux :
 
 ::: formula Loi de la variance totale
 $$
@@ -75,21 +104,21 @@ $$
 
 ## Dérivation
 
-**La forme de calcul.** On développe le carré et on utilise la linéarité :
+**Forme de calcul.** On développe le carré et on utilise la linéarité :
 
 $$
 \mathbb{E}[(X-\mu)^2] = \mathbb{E}[X^2 - 2\mu X + \mu^2] = \mathbb{E}[X^2] - 2\mu\,\mathbb{E}[X] + \mu^2 = \mathbb{E}[X^2] - \mu^2 .
 $$
 
-**La corrélation est bornée.** On applique Cauchy–Schwarz aux variables centrées : $|\mathbb{E}[(X-\mu_X)(Y-\mu_Y)]| \le \sigma_X \sigma_Y$, donc $|\rho| \le 1$, avec égalité exactement quand $Y = a + bX$ presque sûrement. La corrélation est donc une mesure de dépendance **linéaire**, et rien de plus.
+**La corrélation est bornée.** Cauchy–Schwarz sur les variables centrées donne $|\mathbb{E}[(X-\mu_X)(Y-\mu_Y)]| \le \sigma_X \sigma_Y$, donc $|\rho| \le 1$, avec égalité exactement quand $Y = a + bX$ presque sûrement. La corrélation mesure la dépendance **linéaire**, et rien de plus.
 
-**Diversification.** Prenons $n$ actifs de variance $\sigma^2$ chacun, toutes les paires ayant la même covariance $c = \rho\sigma^2$, détenus en poids égaux $w_i = 1/n$ :
+**Diversification.** Prenons $n$ actifs de variance $\sigma^2$, toutes les paires partageant la covariance $c = \rho\sigma^2$, en poids égaux $w_i = 1/n$ :
 
 $$
 \sigma_p^2 = \frac{1}{n^2}\Big( n\sigma^2 + n(n-1)c \Big) = \frac{\sigma^2}{n} + \Big(1 - \frac{1}{n}\Big) c .
 $$
 
-Quand $n \to \infty$ le premier terme s'annule : le risque idiosyncratique est diversifiable. Le second tend vers $c = \rho\sigma^2$, donc la volatilité du portefeuille bute sur $\sigma\sqrt{\rho}$. **C'est la covariance qui fixe le plancher**, et aucune quantité de lignes ne l'enlève.
+Quand $n \to \infty$ le premier terme s'annule — le risque idiosyncratique est diversifiable — et le second tend vers $\rho\sigma^2$, donc la volatilité du portefeuille bute sur $\sigma\sqrt{\rho}$. **C'est la covariance qui fixe le plancher**, et aucune quantité de lignes ne l'enlève.
 
 **Correction de Bessel.** Avec $\bar{X} = \frac1n\sum_i X_i$ sur un échantillon i.i.d.,
 
@@ -97,7 +126,7 @@ $$
 \mathbb{E}\Big[\sum_i (X_i - \bar{X})^2\Big] = \mathbb{E}\Big[\sum_i (X_i-\mu)^2\Big] - n\,\mathbb{E}\big[(\bar{X}-\mu)^2\big] = n\sigma^2 - n\cdot\frac{\sigma^2}{n} = (n-1)\sigma^2 .
 $$
 
-Diviser par $n-1$ donne donc un estimateur sans biais : $s^2 = \frac{1}{n-1}\sum_i (X_i - \bar{X})^2$. L'intuition est que $\bar{X}$ a été ajustée sur les données elles-mêmes, si bien que les écarts autour d'elle sont systématiquement trop petits ; un degré de liberté a été dépensé.
+Diviser par $n-1$ donne l'estimateur sans biais $s^2 = \frac{1}{n-1}\sum_i (X_i - \bar{X})^2$ : $\bar{X}$ a été ajustée sur les données elles-mêmes, donc les écarts autour d'elle sont systématiquement trop petits — un degré de liberté dépensé.
 
 **Loi de la variance totale.** En utilisant la propriété de tour (voir [[conditional-probability]]),
 
@@ -107,19 +136,19 @@ $$
 
 On soustrait $\big(\mathbb{E}[X]\big)^2 = \big(\mathbb{E}[\mathbb{E}[X\mid Y]]\big)^2$ des deux côtés et le membre de droite devient $\mathbb{E}[\operatorname{Var}(X\mid Y)] + \operatorname{Var}(\mathbb{E}[X\mid Y])$.
 
-Lecture financière : soit $Y$ le régime de marché. Variance totale = **variance moyenne intra-régime** + **variance des moyennes de régime**. Un mélange « calme/stressé » peut avoir une variance totale élevée même si chaque régime est individuellement tranquille, simplement parce que les deux moyennes diffèrent.
+Avec $Y$ le régime de marché : variance totale = **variance moyenne intra-régime** + **variance des moyennes de régime**. Un mélange calme/stressé peut avoir une variance totale élevée même si chaque régime est tranquille, simplement parce que les moyennes diffèrent.
 
 ## Hypothèses et cas limites
 
-- **Le moment d'ordre deux doit exister.** Une loi de Student à $\nu \le 2$ degrés de liberté, ou une Cauchy, a une variance infinie ou non définie. Les variances empiriques de telles données croissent avec la taille de l'échantillon au lieu de converger : tout chiffre de risque fondé sur la variance y est vide de sens.
-- **Non corrélé est plus faible qu'indépendant.** Avec $X \sim \mathcal{N}(0,1)$ et $Y = X^2$, $\operatorname{Cov}(X,Y) = \mathbb{E}[X^3] = 0$ bien que $Y$ soit une fonction déterministe de $X$. La corrélation ne voit rien ; la dépendance est totale.
-- **La forme de calcul est numériquement dangereuse.** $\mathbb{E}[X^2] - \mathbb{E}[X]^2$ soustrait deux grands nombres presque égaux dès que $\mu \gg \sigma$ (une série de prix, un niveau d'indice). L'erreur relative d'arrondi est amplifiée d'environ $(\mu/\sigma)^2$, et le résultat peut même sortir négatif. Il faut passer par un algorithme en deux passes ou la mise à jour de Welford sur données centrées ; `numpy.var` le fait déjà.
-- **Les matrices de covariance empiriques sont mal conditionnées.** Avec $n$ actifs et $T$ observations, $\hat\Sigma$ est singulière dès que $T \le n$, et ses valeurs propres extrêmes sont fortement biaisées même pour $T$ valant quelques fois $n$. Les optimiseurs qui inversent $\hat\Sigma$ courent alors après le bruit, d'où l'existence des méthodes de shrinkage.
-- **Les poids doivent être traités de façon cohérente.** $w^\top \Sigma w$ suppose $w$ fixe sur la période. Un portefeuille rebalancé, ou dont les poids dérivent, a une variance différente de celle que renvoie cette formule.
+- **Le moment d'ordre deux doit exister.** Une loi de Student à $\nu \le 2$, ou une Cauchy, a une variance infinie ou non définie ; les variances empiriques croissent avec la taille de l'échantillon au lieu de converger, et tout chiffre de risque fondé sur la variance y est vide de sens.
+- **Non corrélé est plus faible qu'indépendant.** Avec $X \sim \mathcal{N}(0,1)$ et $Y = X^2$, $\operatorname{Cov}(X,Y) = \mathbb{E}[X^3] = 0$ bien que $Y$ soit une fonction déterministe de $X$.
+- **La forme de calcul est numériquement dangereuse.** $\mathbb{E}[X^2] - \mathbb{E}[X]^2$ soustrait deux grands nombres presque égaux dès que $\mu \gg \sigma$ ; l'erreur relative d'arrondi est amplifiée d'environ $(\mu/\sigma)^2$ et le résultat peut sortir négatif. Passe par deux passes ou Welford sur données centrées, comme le fait `numpy.var`.
+- **Les matrices de covariance empiriques sont mal conditionnées.** $\hat\Sigma$ est singulière dès que $T \le n$, et ses valeurs propres extrêmes sont fortement biaisées même pour $T$ valant quelques fois $n$. Les optimiseurs qui l'inversent courent après le bruit — d'où le shrinkage.
+- **Les poids doivent être traités de façon cohérente.** $w^\top \Sigma w$ suppose $w$ fixe sur la période ; un portefeuille rebalancé ou qui dérive a une variance différente.
 
 ## Exemple détaillé
 
-On simule trois actifs corrélés, on vérifie que la variance directe de la série du portefeuille et la forme quadratique $w^\top\Sigma w$ coïncident, puis on trace la courbe de diversification.
+Trois actifs corrélés : on vérifie que la variance directe de la série du portefeuille et $w^\top\Sigma w$ coïncident, puis on trace la courbe de diversification.
 
 ```python
 import numpy as np
@@ -165,50 +194,15 @@ sample    w'S_hat w = 0.025057
 ```
 :::
 
-Deux lectures. D'abord, $w^\top\Sigma w$ retrouve la variance empirique directe aux trois premiers chiffres significatifs — c'est l'erreur d'échantillonnage, et non une erreur de modélisation, qui explique l'écart, et en injectant la covariance *empirique* on reproduit exactement le nombre direct, comme il se doit. Ensuite, en termes de variance, la moitié de la diversification atteignable est déjà obtenue avec 2 lignes et l'essentiel avec 10 : passer de 10 à 50 lignes ne gagne que $0{,}0096$ de volatilité, tandis que le plancher de corrélation $\sigma\sqrt{\rho} = 0{,}20\sqrt{0{,}3} = 0{,}1095$ est indépassable.
+$w^\top\Sigma w$ retrouve la variance empirique directe aux trois premiers chiffres significatifs — c'est l'erreur d'échantillonnage, non une erreur de modélisation, et la covariance *empirique* reproduit exactement le nombre direct, comme il se doit. Et la moitié de la diversification atteignable est déjà obtenue avec 2 lignes, l'essentiel avec 10 : passer de 10 à 50 lignes ne gagne que $0{,}0096$ de volatilité, tandis que le plancher $\sigma\sqrt{\rho} = 0{,}20\sqrt{0{,}3} = 0{,}1095$ est indépassable.
 
 ## Pourquoi c'est important en finance quantitative
 
-- **Le risque se cote sous forme de variance.** Tout chiffre de risque part d'ici : la [[volatility|volatilité]] est $\sqrt{\operatorname{Var}}$ des rendements, la [[value-at-risk]] paramétrique vaut $\mu + \sigma z_\alpha$, et le véga des [[greeks]] est l'exposition à la volatilité que le marché price, tandis qu'un livre delta-couvert est exposé à la *variance* réalisée.
-- **La construction de portefeuille est un problème de variance.** Markowitz minimise $w^\top\Sigma w$ sous contrainte de rendement cible ; la parité de risque égalise la contribution $w_i (\Sigma w)_i$ de chaque actif ; le budget de risque la décompose. Tout dépend de la qualité de $\hat\Sigma$.
-- **Les moindres carrés sont une décomposition de variance.** Dans la [[linear-regression|régression linéaire]], le $R^2$ est la fraction de la variance de $y$ expliquée par l'ajustement, et les MCO sont exactement l'estimateur qui minimise la variance résiduelle.
-- **Couvrir, c'est minimiser une variance.** Le ratio de couverture de variance minimale d'une exposition $Y$ par un instrument $X$ vaut $\beta = \operatorname{Cov}(X,Y)/\operatorname{Var}(X)$ — la même formule qu'une pente de régression, et ce n'est pas un hasard.
-- **La loi de la variance totale est la décomposition par régime.** Séparer le risque réalisé en une part intra-régime et une part inter-régime, c'est ainsi que l'on distingue « le marché est nerveux » de « le marché s'est re-pricé ».
-
-## Erreurs fréquentes
-
-::: pitfall Calculer la variance par $\mathbb{E}[X^2] - \mathbb{E}[X]^2$ sur des niveaux bruts
-Sur une série de moyenne $10^4$ et d'écart-type $1$, les deux termes coïncident sur huit chiffres significatifs alors que la double précision en offre environ seize — on perd la moitié de ses chiffres, et la simple précision n'en garderait aucun. Il faut centrer les données d'abord, ou utiliser l'algorithme en ligne de Welford. Une « variance négative » en production, c'est presque toujours ce bug.
-:::
-
-::: pitfall Lire une corrélation nulle comme une indépendance
-La corrélation ne détecte que la partie linéaire d'une relation. Un livre d'options delta-couvert a par construction une corrélation quasi nulle avec le sous-jacent et reste pourtant entièrement un pari sur lui, via le gamma. Regarde les nuages de points, les corrélations de rang ou la dépendance de queue avant de conclure « aucune relation ».
-:::
-
-::: pitfall Croire qu'une variance sans biais donne une volatilité sans biais
-$s^2$ est sans biais pour $\sigma^2$, mais $\sqrt{\cdot}$ est strictement concave, donc l'inégalité de Jensen donne $\mathbb{E}[s] < \sqrt{\mathbb{E}[s^2]} = \sigma$. L'estimateur usuel **sous**-estime la volatilité, d'environ $\sigma/(4n)$ pour $n$ modéré sous hypothèse normale. Le biais est petit devant le bruit de l'estimateur lui-même, mais le $n-1$ au dénominateur ne le corrige pas.
-:::
-
-::: pitfall Traiter la variance comme une mesure de risque complète
-La variance est symétrique : une journée à $+10\%$ et une journée à $-10\%$ contribuent identiquement, alors qu'une seule des deux inquiète un risk manager. Elle suppose aussi un moment d'ordre deux fini, ce que les modèles à queues épaisses cassent délibérément. Associe-la à une mesure de baisse (semi-variance, expected shortfall) dès que le payoff est asymétrique — un livre d'options avant tout.
-:::
-
-## Révision en 30 secondes
-
-$\operatorname{Var}(X) = \mathbb{E}[(X-\mu)^2] = \mathbb{E}[X^2] - \mu^2$ — numériquement, on utilise la première forme, jamais la seconde sur des niveaux bruts. $\operatorname{Var}(aX+b) = a^2\operatorname{Var}(X)$ ; les variances s'additionnent quand les covariances s'annulent, et la non-corrélation suffit. Le risque de portefeuille vaut $w^\top\Sigma w$ ; à $n$ poids égaux il vaut $\sigma^2/n + (1-1/n)\rho\sigma^2$, donc la diversification s'arrête à $\sigma\sqrt{\rho}$. La variance empirique divise par $n-1$ (un degré de liberté dépensé sur la moyenne), mais sa racine reste biaisée vers le bas. Loi de la variance totale : moyenne intra-groupe plus dispersion inter-groupes. La variance est symétrique et exige un moment d'ordre deux fini — jamais toute l'histoire du risque.
-
-## Formules clés
-
-| Nom | Formule |
-|---|---|
-| Définition | $\operatorname{Var}(X) = \mathbb{E}[(X-\mu)^2] = \mathbb{E}[X^2] - \mu^2$ |
-| Application affine | $\operatorname{Var}(aX + b) = a^2\operatorname{Var}(X)$ |
-| Somme | $\operatorname{Var}(X+Y) = \operatorname{Var}(X) + \operatorname{Var}(Y) + 2\operatorname{Cov}(X,Y)$ |
-| Corrélation | $\rho_{XY} = \operatorname{Cov}(X,Y)/(\sigma_X\sigma_Y) \in [-1,1]$ |
-| Portefeuille | $\sigma_p^2 = w^\top\Sigma w$ |
-| Poids égaux | $\sigma_p^2 = \dfrac{\sigma^2}{n} + \Big(1-\dfrac1n\Big)\rho\sigma^2 \;\to\; \rho\sigma^2$ |
-| Variance empirique | $s^2 = \dfrac{1}{n-1}\sum_i (X_i-\bar X)^2$ |
-| Variance totale | $\operatorname{Var}(X) = \mathbb{E}[\operatorname{Var}(X\mid Y)] + \operatorname{Var}(\mathbb{E}[X\mid Y])$ |
+- **Le risque se cote sous forme de variance.** La [[volatility|volatilité]] est $\sqrt{\operatorname{Var}}$ des rendements, la [[value-at-risk]] paramétrique vaut $\mu + \sigma z_\alpha$, le véga des [[greeks]] est l'exposition à la volatilité pricée, et un livre delta-couvert est exposé à la variance *réalisée*.
+- **La construction de portefeuille est un problème de variance.** Markowitz minimise $w^\top\Sigma w$ sous contrainte de rendement ; la parité de risque égalise chaque contribution $w_i (\Sigma w)_i$. Tout dépend de la qualité de $\hat\Sigma$.
+- **Les moindres carrés sont une décomposition de variance.** Dans la [[linear-regression|régression linéaire]], le $R^2$ est la fraction de la variance de $y$ expliquée, et les MCO minimisent la variance résiduelle.
+- **Couvrir, c'est minimiser une variance.** Le ratio de couverture de variance minimale vaut $\beta = \operatorname{Cov}(X,Y)/\operatorname{Var}(X)$ — la pente de régression, et ce n'est pas un hasard.
+- **La loi de la variance totale est la décomposition par régime.** Elle distingue « le marché est nerveux » de « le marché s'est re-pricé ».
 
 ## Questions d'entretien
 
@@ -217,9 +211,7 @@ $\operatorname{Var}(X) = \mathbb{E}[(X-\mu)^2] = \mathbb{E}[X^2] - \mu^2$ — nu
 Utilise $\sigma_p^2 = w_1^2\sigma_1^2 + w_2^2\sigma_2^2 + 2w_1w_2\rho\sigma_1\sigma_2$ avec $w_1 = w_2 = 1/2$.
 :::
 ::: answer
-$\sigma_p^2 = 0{,}25(0{,}04) + 0{,}25(0{,}04) + 2(0{,}25)(0{,}5)(0{,}04) = 0{,}01 + 0{,}01 + 0{,}01 = 0{,}03$, donc $\sigma_p = \sqrt{0{,}03} \approx 17{,}3\,\%$.
-
-De façon équivalente, à volatilités égales la formule se réduit à $\sigma_p = \sigma\sqrt{(1+\rho)/2} = 0{,}20\sqrt{0{,}75}$. Vérification : $\rho = 1$ donne $20\,\%$ (aucune diversification), $\rho = -1$ donne $0$ (couverture parfaite).
+$\sigma_p^2 = 0{,}25(0{,}04) + 0{,}25(0{,}04) + 2(0{,}25)(0{,}5)(0{,}04) = 0{,}01 + 0{,}01 + 0{,}01 = 0{,}03$, donc $\sigma_p = \sqrt{0{,}03} \approx 17{,}3\,\%$. À volatilités égales la formule se réduit à $\sigma_p = \sigma\sqrt{(1+\rho)/2} = 0{,}20\sqrt{0{,}75}$ ; $\rho = 1$ donne $20\,\%$ (aucune diversification), $\rho = -1$ donne $0$ (couverture parfaite).
 :::
 :::
 
@@ -228,9 +220,9 @@ De façon équivalente, à volatilités égales la formule se réduit à $\sigma
 Calcule $\mathbb{E}\big[\sum_i (X_i - \bar X)^2\big]$, puis demande-toi ce qu'une racine carrée fait à une espérance.
 :::
 ::: answer
-$\sum_i(X_i-\bar X)^2 = \sum_i (X_i-\mu)^2 - n(\bar X - \mu)^2$, dont l'espérance vaut $n\sigma^2 - n(\sigma^2/n) = (n-1)\sigma^2$. Les écarts sont mesurés autour d'une moyenne ajustée sur les mêmes données, donc trop petits d'exactement un degré de liberté ; diviser par $n-1$ rétablit l'absence de biais.
+$\sum_i(X_i-\bar X)^2 = \sum_i (X_i-\mu)^2 - n(\bar X - \mu)^2$, dont l'espérance vaut $n\sigma^2 - n(\sigma^2/n) = (n-1)\sigma^2$. Les écarts sont mesurés autour d'une moyenne ajustée sur les mêmes données, donc trop petits d'un degré de liberté.
 
-Non, $s$ n'est pas sans biais. La racine carrée est strictement concave, donc Jensen donne $\mathbb{E}[s] < \sqrt{\mathbb{E}[s^2]} = \sigma$ : la volatilité est systématiquement sous-estimée. Sous hypothèse normale la correction exacte est $\mathbb{E}[s] = c_4(n)\,\sigma$ avec $c_4(n) = \sqrt{2/(n-1)}\,\Gamma(n/2)/\Gamma((n-1)/2)$, soit environ $1 - 1/(4n)$. L'absence de biais ne survit pas à une transformation non linéaire.
+Non, $s$ n'est pas sans biais : la racine carrée est concave, donc Jensen donne $\mathbb{E}[s] < \sqrt{\mathbb{E}[s^2]} = \sigma$. Sous hypothèse normale, $\mathbb{E}[s] = c_4(n)\,\sigma$ avec $c_4(n) = \sqrt{2/(n-1)}\,\Gamma(n/2)/\Gamma((n-1)/2)$, soit environ $1 - 1/(4n)$. L'absence de biais ne survit pas à une transformation non linéaire.
 :::
 :::
 
@@ -241,11 +233,11 @@ Non, $s$ n'est pas sans biais. La racine carrée est strictement concave, donc J
 ::: answer
 $\sigma_p^2 = \frac{1}{n^2}\big(n\sigma^2 + n(n-1)\rho\sigma^2\big) = \frac{\sigma^2}{n} + \big(1-\frac1n\big)\rho\sigma^2 \to \rho\sigma^2$, donc $\sigma_p \to \sigma\sqrt{\rho}$.
 
-L'excès au-dessus du plancher vaut $\sigma^2(1-\rho)/n$, il décroît donc en $1/n$ en variance et à peu près en $1/\sqrt{n}$ en volatilité au début : avec $\sigma = 20\,\%$ et $\rho = 0{,}3$, le plancher est à $10{,}95\,\%$ et on atteint $12{,}2\,\%$ avec seulement 10 lignes. En pratique le gain de diversification est essentiellement épuisé vers 20–30 lignes ; au-delà on ne paie plus que des coûts de transaction. Si $\rho \le 0$ l'argument du plancher tombe — mais une matrice de corrélation dont toutes les paires valent $\rho$ n'est semi-définie positive que si $\rho \ge -1/(n-1)$, donc un grand portefeuille ne peut pas être uniformément négativement corrélé.
+L'excès au-dessus du plancher vaut $\sigma^2(1-\rho)/n$, décroissant en $1/n$ en variance : avec $\sigma = 20\,\%$ et $\rho = 0{,}3$, le plancher est à $10{,}95\,\%$ et 10 lignes atteignent déjà $12{,}2\,\%$. Le gain est essentiellement épuisé vers 20–30 lignes ; au-delà on ne paie que des coûts de transaction. Si $\rho \le 0$ l'argument tombe — mais une matrice équicorrélée n'est semi-définie positive que si $\rho \ge -1/(n-1)$, donc un grand portefeuille ne peut pas être uniformément négativement corrélé.
 :::
 :::
 
-::: question Le rendement quotidien d'une action a une volatilité de 1 % en régime calme (probabilité 80 %) et de 3 % en régime stressé (probabilité 20 %). Le rendement moyen est nul en régime calme et de $-1\,\%$ en régime stressé. Quelle est la volatilité inconditionnelle, et que manque-t-on en ignorant les moyennes de régime ?
+::: question Le rendement quotidien d'une action a une volatilité de 1 % en régime calme (probabilité 80 %) et de 3 % en régime stressé (20 %), de moyenne nulle et $-1\,\%$ respectivement. Quelle est la volatilité inconditionnelle, et que manque-t-on en ignorant les moyennes de régime ?
 ::: hint
 Loi de la variance totale. Calcule séparément $\mathbb{E}[\operatorname{Var}(X\mid Y)]$ et $\operatorname{Var}(\mathbb{E}[X\mid Y])$.
 :::
@@ -254,6 +246,6 @@ Terme intra-régime : $0{,}8(0{,}01)^2 + 0{,}2(0{,}03)^2 = 0{,}00008 + 0{,}00018
 
 Terme inter-régimes : $\mathbb{E}[X] = 0{,}8(0) + 0{,}2(-0{,}01) = -0{,}002$, donc $\operatorname{Var}(\mathbb{E}[X\mid Y]) = 0{,}8(0 + 0{,}002)^2 + 0{,}2(-0{,}01 + 0{,}002)^2 = 0{,}0000032 + 0{,}0000128 = 0{,}000016$.
 
-Total $= 0{,}000276$, soit $\sigma = 1{,}66\,\%$ par jour, contre $1{,}61\,\%$ si l'on ne gardait que la partie intra-régime. Ignorer la différence des moyennes sous-estime ici le risque d'environ 3 % — modeste, mais l'écart croît quadratiquement avec la distance entre les moyennes de régime, et c'est exactement le terme qu'un calcul naïf « moyenne des deux volatilités » laisse tomber. La même décomposition explique pourquoi un mélange de deux lois normales a des queues épaisses et un excès de kurtosis alors que chaque composante est gaussienne : la loi inconditionnelle n'est pas la loi moyenne.
+Total $= 0{,}000276$, soit $\sigma = 1{,}66\,\%$ par jour, contre $1{,}61\,\%$ en ne gardant que la partie intra-régime. Ignorer la différence des moyennes sous-estime ici le risque d'environ 3 % — modeste, mais l'écart croît quadratiquement avec la distance entre les moyennes de régime, et c'est exactement ce qu'un calcul naïf « moyenne des deux volatilités » laisse tomber. La même décomposition explique pourquoi un mélange de deux lois normales a des queues épaisses alors que chaque composante est gaussienne : la loi inconditionnelle n'est pas la loi moyenne.
 :::
 :::

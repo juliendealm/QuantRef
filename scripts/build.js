@@ -667,7 +667,7 @@ function build() {
   write("index.html", rootRedirect());
 
   const n = site.languages.reduce((a, l) => a + Object.keys(index[l]).length, 0);
-  console.log(`built ${n} concept pages in ${Date.now() - started} ms → dist/`);
+  console.log(`built ${n} concept pages in ${Date.now() - started} ms → ${path.relative(ROOT, OUT) || OUT}/`);
 }
 
 build();
