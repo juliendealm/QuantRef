@@ -503,7 +503,14 @@ function graphPage(lang, index) {
 <h1>${t.graphTitle}</h1>
 <p class="intro">${t.graphIntro}</p>
 <div class="legend">${legend}</div>
-<div class="graph-wrap"><svg id="graph" class="graph"></svg></div>
+<div class="graph-wrap">
+  <svg id="graph" class="graph"></svg>
+  <div class="graph-controls">
+    <button data-zoom="in" title="${t.zoomIn}" aria-label="${t.zoomIn}">+</button>
+    <button data-zoom="out" title="${t.zoomOut}" aria-label="${t.zoomOut}">−</button>
+    <button data-zoom="fit" title="${t.zoomFit}" aria-label="${t.zoomFit}">⤡</button>
+  </div>
+</div>
 <script id="graph-data" type="application/json">${JSON.stringify(data)}</script>`;
   return layout({ lang, title: t.graphTitle, body, rel, page: "graph", otherLangHref: `${rel}${other}/graph.html` });
 }

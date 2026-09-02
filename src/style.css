@@ -300,14 +300,23 @@ button.linklike { font: inherit; font-size: 0.85rem; background: none; border: 0
 .legend { display: flex; flex-wrap: wrap; gap: 0.4rem 1rem; font-size: 0.85rem; color: var(--fg-2); margin: 0.6rem 0 1rem; }
 .legend-item { display: inline-flex; gap: 0.4rem; align-items: center; }
 .legend-item i { width: 11px; height: 11px; border-radius: 50%; display: inline-block; }
-.graph-wrap { border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-2); overflow: auto; }
-.graph { display: block; max-width: 100%; height: auto; font-family: var(--sans); }
+.graph-wrap { position: relative; border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-2); overflow: hidden; }
+.graph { display: block; width: 100%; height: clamp(360px, 66vh, 680px); font-family: var(--sans); cursor: grab; touch-action: pan-y; }
+.graph:focus-visible { outline: 2px solid var(--info); outline-offset: -2px; }
+.graph.panning { cursor: grabbing; }
+.page-graph { max-width: 1500px; }
+.graph-controls { position: absolute; top: 10px; right: 10px; display: flex; flex-direction: column; gap: 4px; }
+.graph-controls button {
+  width: 30px; height: 30px; font: inherit; font-size: 1rem; line-height: 1;
+  border: 1px solid var(--line); border-radius: 7px; background: var(--bg); color: var(--fg-2); cursor: pointer;
+}
+.graph-controls button:hover { background: var(--bg-3); color: var(--fg); }
 .graph .edge { fill: none; stroke: var(--fg-3); stroke-width: 1.4; opacity: 0.5; transition: opacity 0.15s, stroke 0.15s; }
 .graph .edge.hi { stroke: var(--accent); opacity: 1; stroke-width: 2; }
 .graph .edge.dim { opacity: 0.08; }
 .graph .node { cursor: pointer; }
 .graph .node rect { fill: var(--bg); stroke-width: 1.5; rx: 8; transition: opacity 0.15s; }
-.graph .node text { fill: var(--fg); font-size: 12.5px; pointer-events: none; }
+.graph .node text { fill: var(--fg); font-size: 13.5px; pointer-events: none; }
 .graph .node.dim { opacity: 0.2; }
 .graph .node.hi rect { stroke-width: 2.5; }
 .graph .node.self rect { fill: var(--accent-2); }
@@ -326,6 +335,7 @@ button.linklike { font: inherit; font-size: 0.85rem; background: none; border: 0
   /* minmax(0, 1fr), not 1fr: an auto minimum is min-content, which lets wide
      code blocks and formulas blow the column past the viewport. */
   .concept-layout, .dash-layout { grid-template-columns: minmax(0, 1fr); }
+  .graph { height: clamp(300px, 55vh, 460px); }
   .side, .dash-side { position: static; max-height: none; }
   .concept { max-width: none; }
   .side .toc, .side .edit { display: none; }

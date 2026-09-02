@@ -362,7 +362,7 @@
     data.nodes.forEach((n) => d(n.id));
     const maxDepth = Math.max(0, ...data.nodes.map((n) => depth[n.id]));
 
-    const NW = 190, NH = 38, DH = 12, GX = 90, GY = 16, PAD = 30;
+    const NW = 180, NH = 38, DH = 12, GX = 80, GY = 16, PAD = 28;
 
     // Layered layout. An edge spanning more than one column gets a dummy node in
     // each column it crosses, so it is routed through a reserved empty slot
@@ -413,8 +413,6 @@
       for (let c = maxDepth - 1; c >= 0; c--) { cols[c].sort((a, b) => bary(a, layNext) - bary(b, layNext)); place(); }
     }
     const W = PAD * 2 + (maxDepth + 1) * NW + maxDepth * GX;
-    svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    svg.style.width = W + "px";
 
     const ns = "http://www.w3.org/2000/svg";
     const el = (tag, attrs = {}) => {
@@ -427,6 +425,8 @@
     marker.appendChild(el("path", { d: "M0,0 L10,5 L0,10 z", class: "arrow" }));
     defs.appendChild(marker);
     svg.appendChild(defs);
+    const vp = el("g", { class: "vp" });
+    svg.appendChild(vp);
 
     function pathThrough(chain) {
       // A dummy contributes two points, so the edge crosses its column as a
@@ -452,7 +452,7 @@
       const p = el("path", { d: pathThrough(r.chain), class: "edge", "marker-end": "url(#arrow)" });
       p.dataset.from = r.from;
       p.dataset.to = r.to;
-      svg.appendChild(p);
+      vp.appendChild(p);
       return p;
     });
     const nodeEls = {};
@@ -462,15 +462,15 @@
       g.dataset.id = n.id;
       g.appendChild(el("rect", { width: NW, height: NH }));
       const label = el("text", { x: 12, y: NH / 2 + 4.5 });
-      label.textContent = n.title.length > 26 ? n.title.slice(0, 25) + "…" : n.title;
+      label.textContent = n.title.length > 24 ? n.title.slice(0, 23) + "…" : n.title;
       g.appendChild(label);
       const title = el("title");
       title.textContent = `${n.title} · ${n.subjectName}`;
       g.appendChild(title);
-      g.addEventListener("click", () => (location.href = rel + lang + "/" + n.href));
+      g.addEventListener("click", () => { if (!dragged) location.href = rel + lang + "/" + n.href; });
       g.addEventListener("mouseenter", () => focus(n.id));
       g.addEventListener("mouseleave", () => focus(null));
-      svg.appendChild(g);
+      vp.appendChild(g);
       nodeEls[n.id] = g;
     }
     function lineage(id) {
@@ -497,6 +497,139 @@
         g.classList.toggle("dim", !set.has(nid));
         g.classList.toggle("self", nid === id);
       }
+    }
+
+    // ---- pan and zoom -----------------------------------------------------
+    // The svg keeps a 1-unit-per-CSS-pixel viewBox and all the content lives in
+    // `vp`, so panning and zooming is one transform on that group.
+    const MAX_K = 4;
+    let MIN_K = 0.25, k = 1, tx = 0, ty = 0, dragged = false;
+
+    function apply() {
+      vp.setAttribute("transform", `translate(${tx.toFixed(2)},${ty.toFixed(2)}) scale(${k.toFixed(4)})`);
+    }
+    function size() {
+      const r = svg.getBoundingClientRect();
+      return { w: r.width || svg.clientWidth || 800, h: r.height || svg.clientHeight || 400 };
+    }
+    function syncViewBox() {
+      const { w, h } = size();
+      svg.setAttribute("viewBox", `0 0 ${Math.round(w)} ${Math.round(h)}`);
+    }
+    function fit() {
+      // Height follows the content so a short graph does not sit in a tall empty
+      // box, with headroom left over so there is somewhere to pan once zoomed in.
+      const w0 = svg.getBoundingClientRect().width || 800;
+      const fitted = Math.min(1, (w0 - 24) / W);
+      const minH = w0 < 700 ? 260 : 340;
+      svg.style.height = Math.min(680, Math.max(minH, Math.round(H * fitted) + 120)) + "px";
+      syncViewBox();
+      const { w, h } = size();
+      k = Math.min(1, (w - 24) / W, (h - 24) / H);
+      // Never allow zooming out past the whole-graph view, however small that is
+      // on a narrow screen, so the fitted view always fits.
+      MIN_K = Math.min(0.25, k);
+      tx = (w - W * k) / 2;
+      ty = (h - H * k) / 2;
+      apply();
+    }
+    function zoomAt(cx, cy, factor) {
+      const nk = Math.min(MAX_K, Math.max(MIN_K, k * factor));
+      if (nk === k) return;
+      // Keep the content point under (cx, cy) fixed.
+      tx = cx - ((cx - tx) / k) * nk;
+      ty = cy - ((cy - ty) / k) * nk;
+      k = nk;
+      apply();
+    }
+    const localPoint = (e) => {
+      const r = svg.getBoundingClientRect();
+      return [e.clientX - r.left, e.clientY - r.top];
+    };
+
+    svg.addEventListener("wheel", (e) => {
+      e.preventDefault();
+      const [cx, cy] = localPoint(e);
+      // ctrlKey is set by trackpad pinch; treat it as a stronger zoom.
+      const step = e.ctrlKey ? 0.01 : 0.0022;
+      zoomAt(cx, cy, Math.exp(-e.deltaY * step));
+    }, { passive: false });
+
+    const pointers = new Map();
+    let pinchDist = 0, panStart = null, moved = 0;
+
+    svg.addEventListener("pointerdown", (e) => {
+      svg.setPointerCapture(e.pointerId);
+      pointers.set(e.pointerId, localPoint(e));
+      moved = 0;
+      dragged = false;
+      if (pointers.size === 1) {
+        const [x, y] = pointers.get(e.pointerId);
+        panStart = { x, y, tx, ty };
+        svg.classList.add("panning");
+      } else if (pointers.size === 2) {
+        const [a, b] = [...pointers.values()];
+        pinchDist = Math.hypot(a[0] - b[0], a[1] - b[1]);
+        panStart = null;
+      }
+    });
+    svg.addEventListener("pointermove", (e) => {
+      if (!pointers.has(e.pointerId)) return;
+      pointers.set(e.pointerId, localPoint(e));
+      if (pointers.size === 2) {
+        const [a, b] = [...pointers.values()];
+        const d = Math.hypot(a[0] - b[0], a[1] - b[1]);
+        if (pinchDist > 0) zoomAt((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, d / pinchDist);
+        pinchDist = d;
+        dragged = true;
+        return;
+      }
+      if (!panStart) return;
+      const [x, y] = pointers.get(e.pointerId);
+      moved = Math.max(moved, Math.hypot(x - panStart.x, y - panStart.y));
+      if (moved > 4) dragged = true;
+      tx = panStart.tx + (x - panStart.x);
+      ty = panStart.ty + (y - panStart.y);
+      apply();
+    });
+    const endPointer = (e) => {
+      pointers.delete(e.pointerId);
+      if (pointers.size < 2) pinchDist = 0;
+      if (pointers.size === 0) {
+        panStart = null;
+        svg.classList.remove("panning");
+        // Let the click that follows this pointerup see `dragged`, then clear it.
+        setTimeout(() => { dragged = false; }, 0);
+      }
+    };
+    svg.addEventListener("pointerup", endPointer);
+    svg.addEventListener("pointercancel", endPointer);
+
+    document.querySelectorAll(".graph-controls button").forEach((b) =>
+      b.addEventListener("click", () => {
+        const { w, h } = size();
+        if (b.dataset.zoom === "fit") fit();
+        else zoomAt(w / 2, h / 2, b.dataset.zoom === "in" ? 1.3 : 1 / 1.3);
+      })
+    );
+    svg.setAttribute("tabindex", "0");
+    svg.addEventListener("keydown", (e) => {
+      const { w, h } = size();
+      if (e.key === "+" || e.key === "=") { e.preventDefault(); zoomAt(w / 2, h / 2, 1.3); }
+      else if (e.key === "-") { e.preventDefault(); zoomAt(w / 2, h / 2, 1 / 1.3); }
+      else if (e.key === "0") { e.preventDefault(); fit(); }
+    });
+
+    fit();
+    if ("ResizeObserver" in window) {
+      // Observe the wrapper, not the svg: fit() sets the svg height, which would
+      // otherwise retrigger the observer forever.
+      const wrap = svg.parentElement;
+      let lastW = Math.round(wrap.getBoundingClientRect().width);
+      new ResizeObserver(() => {
+        const w = Math.round(wrap.getBoundingClientRect().width);
+        if (w !== lastW) { lastW = w; fit(); }
+      }).observe(wrap);
     }
   }
 })();
