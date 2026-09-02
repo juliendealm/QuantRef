@@ -41,7 +41,7 @@ De façon équivalente, le mouvement brownien est le processus gaussien centré 
 
 ::: formula Principe d'invariance de Donsker
 $$
-W^{(n)}_t = \frac{S_{\lfloor nt \rfloor}}{\sqrt{n}} \;\xrightarrow[n \to \infty]{d}\; W_t
+W^{(n)}_t = \frac{S_{\lfloor nt \rfloor}}{\sqrt{n}}, \qquad W^{(n)} \;\underset{n \to \infty}{\Longrightarrow}\; W \ \text{ dans } D[0,T]
 $$
 en tant que processus sur $[0, T]$ : c'est la loi de la trajectoire entière qui converge, pas seulement chaque marginale. La limite ne dépend pas de la loi de $\xi$, d'où « invariance ».
 :::
@@ -60,7 +60,7 @@ En notation différentielle : $(dW_t)^2 = dt$, $dW_t\,dt = 0$, $(dt)^2 = 0$.
 
 - *Régularité.* Les trajectoires sont höldériennes de tout ordre $< 1/2$, mais nulle part dérivables et à variation infinie sur tout intervalle.
 - *Principe de réflexion.* Avec $M_t = \max_{s \le t} W_s$ et $a > 0$, $\mathbb{P}(M_t \ge a) = 2\,\mathbb{P}(W_t \ge a) = 2\big(1 - \Phi(a/\sqrt{t})\big)$. Le temps de premier passage $\tau_a = \inf\{t : W_t = a\}$ est fini p.s. mais $\mathbb{E}[\tau_a] = \infty$.
-- *Markov et martingale.* $W$ est un processus de Markov (fort), et $W_t$, $W_t^2 - t$, $\exp(\sigma W_t - \sigma^2 t/2)$ sont des [[martingales]]. Caractérisation de Lévy : toute martingale continue avec $[M]_t = t$ est un mouvement brownien.
+- *Markov et martingale.* $W$ est un processus de Markov (fort), et $W_t$, $W_t^2 - t$, $\exp(\sigma W_t - \sigma^2 t/2)$ sont des [[martingales]]. Caractérisation de Lévy : toute martingale locale continue $M$ telle que $M_0 = 0$ et $[M]_t = t$ est un mouvement brownien.
 
 ::: formula Mouvement brownien géométrique
 $$
@@ -83,7 +83,7 @@ donc $Q_n \to t$ dans $L^2$. Pour la variation totale, $\sum_i \lvert \Delta_i \
 
 **Non-dérivabilité, heuristiquement.** $\dfrac{W_{t+h} - W_t}{h} \sim N(0, 1/h)$, dont la dispersion $h^{-1/2}$ explose quand $h \to 0$ : le taux d'accroissement n'a pas de limite. L'énoncé pour *tous* les $t$ simultanément, presque sûrement, est le théorème de Paley–Wiener–Zygmund.
 
-**Principe de réflexion.** Pour $a > 0$, $\{M_t \ge a\} = \{\tau_a \le t\}$. Par la propriété de Markov forte, la trajectoire après $\tau_a$ est un mouvement brownien neuf parti de $a$, donc sachant $\tau_a \le t$ les événements $W_t > a$ et $W_t < a$ sont équiprobables : $\mathbb{P}(\tau_a \le t,\, W_t \ge a) = \mathbb{P}(\tau_a \le t,\, W_t \le a)$. Comme $\{W_t \ge a\} \subseteq \{\tau_a \le t\}$, en additionnant on obtient $\mathbb{P}(\tau_a \le t) = 2\,\mathbb{P}(W_t \ge a)$. En faisant $t \to \infty$, $\mathbb{P}(\tau_a < \infty) = 1$ ; en dérivant en $t$, on obtient la densité $\dfrac{a}{\sqrt{2\pi t^3}}\,e^{-a^2/(2t)}$, dont la queue en $t^{-3/2}$ rend $\mathbb{E}[\tau_a] = \infty$.
+**Principe de réflexion.** Pour $a > 0$, $\{M_t \ge a\} = \{\tau_a \le t\}$. Par la propriété de Markov forte, la trajectoire après $\tau_a$ est un nouveau mouvement brownien issu de $a$, donc sachant $\tau_a \le t$ les événements $W_t > a$ et $W_t < a$ sont équiprobables : $\mathbb{P}(\tau_a \le t,\, W_t \ge a) = \mathbb{P}(\tau_a \le t,\, W_t \le a)$. Comme $\{W_t \ge a\} \subseteq \{\tau_a \le t\}$, en additionnant on obtient $\mathbb{P}(\tau_a \le t) = 2\,\mathbb{P}(W_t \ge a)$. En faisant $t \to \infty$, $\mathbb{P}(\tau_a < \infty) = 1$ ; en dérivant en $t$, on obtient la densité $\dfrac{a}{\sqrt{2\pi t^3}}\,e^{-a^2/(2t)}$, dont la queue en $t^{-3/2}$ rend $\mathbb{E}[\tau_a] = \infty$.
 
 **Mouvement brownien géométrique.** On applique la [[ito-lemma|formule d'Itô]] à $\log S_t$ avec $dS_t = \mu S_t\,dt + \sigma S_t\,dW_t$ :
 $$
@@ -98,14 +98,14 @@ en utilisant $(dS_t)^2 = \sigma^2 S_t^2\,dt$, qui est la variation quadratique. 
 - **Continu mais pas dérivable.** $dW_t / dt$ n'existe pas en tant que fonction ; le « bruit blanc » n'est qu'un processus généralisé. Tout calcul avec $dW$ doit être celui d'Itô ([[ito-lemma]]) ou de Stratonovich.
 - **La variation quadratique est une limite le long de subdivisions.** La convergence a lieu dans $L^2$ pour toute suite de subdivisions de pas $\to 0$, et presque sûrement le long de subdivisions emboîtées (p. ex. dyadiques). Prise sur *toutes* les subdivisions, la borne supérieure de $\sum \Delta_i^2$ est infinie.
 - **Le modèle casse à l'échelle du tick.** La variance réalisée calculée sur des rendements à très haute fréquence *augmente* avec la fréquence d'échantillonnage à cause du bruit de microstructure (rebond bid–ask, discrétisation des prix), le contraire de $[W]_t = t$. Le mouvement brownien décrit le prix à gros grain.
-- **Mouvement brownien géométrique : bon signe, mauvaise queue.** Les prix restent positifs et les log-rendements sont additifs, mais un $\sigma$ constant et des log-rendements gaussiens i.i.d. sont empiriquement faux. La dérive $\mu$ gouverne $\mathbb{E}[S_t]$ alors qu'une trajectoire typique croît au taux $\mu - \sigma^2/2$ : si $\mu < \sigma^2/2$, alors $S_t \to 0$ presque sûrement même si $\mathbb{E}[S_t] \to \infty$.
+- **Mouvement brownien géométrique : bon signe, mauvaise queue.** Les prix restent positifs et les log-rendements sont additifs, mais un $\sigma$ constant et des log-rendements gaussiens i.i.d. sont empiriquement faux. La dérive $\mu$ gouverne $\mathbb{E}[S_t]$ alors qu'une trajectoire typique croît au taux $\mu - \sigma^2/2$ : si $\mu < \sigma^2/2$, alors $S_t \to 0$ presque sûrement, et lorsque $0 < \mu < \sigma^2/2$ cela se produit alors même que $\mathbb{E}[S_t] \to \infty$.
 - **Plusieurs dimensions.** Des mouvements browniens corrélés se construisent comme $W = LZ$ avec $L$ un facteur de Cholesky de la matrice de corrélation et $Z$ des mouvements browniens indépendants ; alors $d\langle W^i, W^j \rangle_t = \rho_{ij}\,dt$.
 
 ## Exemple détaillé
 
 Deux vérifications numériques, puis une analytique.
 
-Le code simule $20\,000$ trajectoires sur $[0, 2]$ et vérifie $\mathrm{Var}(W_t) = t$, $\mathrm{Cov}(W_{0.5}, W_{1.5}) = 0.5$ et la martingale exponentielle $\mathbb{E}[e^{W_1 - 1/2}] = 1$. Il prend ensuite une *seule* trajectoire sur $[0, 1]$ faite de $10\,000$ accroissements fins et calcule, sur des grilles de $m = 10$, $100$, $1\,000$ et $10\,000$ pas, la variation totale $\sum \lvert \Delta W \rvert$ et la variation quadratique $\sum (\Delta W)^2$. Les accroissements sur grille grossière sont des sommes d'accroissements fins, donc les quatre lignes décrivent la même trajectoire.
+Le code simule $20\,000$ trajectoires sur $[0, 2]$ et vérifie $\mathrm{Var}(W_t) = t$, $\mathrm{Cov}(W_{0{,}5}, W_{1{,}5}) = 0{,}5$ et la martingale exponentielle $\mathbb{E}[e^{W_1 - 1/2}] = 1$. Il prend ensuite une *seule* trajectoire sur $[0, 1]$ faite de $10\,000$ accroissements fins et calcule, sur des grilles de $m = 10$, $100$, $1\,000$ et $10\,000$ pas, la variation totale $\sum \lvert \Delta W \rvert$ et la variation quadratique $\sum (\Delta W)^2$. Les accroissements sur grille grossière sont des sommes d'accroissements fins, donc les quatre lignes décrivent la même trajectoire.
 
 ```python
 import numpy as np
@@ -147,12 +147,12 @@ m= 10000: sum|dW| =  79.326   sum dW^2 = 0.9891
 
 Variance et covariance concordent à l'erreur Monte Carlo près (environ $1\,\%$ avec $20\,000$ trajectoires). Sur la trajectoire unique, la variation quadratique se stabilise près de $1$ ; son écart-type sur $m$ intervalles vaut $\sqrt{2/m}$, soit $0{,}45$ pour $m = 10$ et $0{,}014$ pour $m = 10\,000$, ce qui est exactement la dispersion observée. La variation totale, elle, croît comme $\mathbb{E}\sum \lvert \Delta W \rvert = \sqrt{2m/\pi}$ ($2{,}5$ ; $8{,}0$ ; $25{,}2$ ; $79{,}8$) : elle diverge quand la grille se raffine.
 
-Vérification analytique sur le mouvement brownien géométrique avec $\mu = 8\,\%$, $\sigma = 40\,\%$, $T = 10$ ans. Alors $\mu - \sigma^2/2 = 0$, donc le prix terminal médian vaut exactement $S_0$ et $\mathbb{P}(S_T < S_0) = 1/2$, tandis que $\mathbb{E}[S_T] = S_0 e^{0.8} \approx 2{,}23\,S_0$. La probabilité de battre la moyenne est $\mathbb{P}(\sigma W_T > \sigma^2 T / 2) = 1 - \Phi(\sigma\sqrt{T}/2) = 1 - \Phi(0{,}632) \approx 0{,}26$ : la moyenne est portée par un quart des trajectoires. C'est le frein de volatilité (volatility drag).
+Vérification analytique sur le mouvement brownien géométrique avec $\mu = 8\,\%$, $\sigma = 40\,\%$, $T = 10$ ans. Alors $\mu - \sigma^2/2 = 0$, donc le prix terminal médian vaut exactement $S_0$ et $\mathbb{P}(S_T < S_0) = 1/2$, tandis que $\mathbb{E}[S_T] = S_0 e^{0{,}8} \approx 2{,}23\,S_0$. La probabilité de battre la moyenne est $\mathbb{P}(\sigma W_T > \sigma^2 T / 2) = 1 - \Phi(\sigma\sqrt{T}/2) = 1 - \Phi(0{,}632) \approx 0{,}26$ : la moyenne est portée par un quart des trajectoires. C'est le frein de volatilité (volatility drag).
 
 ## Pourquoi c'est important en finance quantitative
 
 - **Le moteur de Black–Scholes.** Sous $\mathbb{Q}$, l'action est un mouvement brownien géométrique de dérive $r$, $S_t = S_0 e^{(r - \sigma^2/2)t + \sigma W^{\mathbb{Q}}_t}$, et un prix d'option est une intégrale gaussienne sur $W_T$. Toute formule de [[black-scholes]] est une propriété du mouvement brownien déguisée.
-- **Le $(dW)^2 = dt$ d'Itô.** La correction $\tfrac12 f''(W_t)\,dt$ dans [[ito-lemma]] *est* la variation quadratique. Sans elle, pas de $-\sigma^2/2$ dans le mouvement brownien géométrique, pas d'arbitrage thêta–gamma, pas d'équation de Black–Scholes.
+- **Le $(dW)^2 = dt$ d'Itô.** La correction $\tfrac12 f''(W_t)\,dt$ dans [[ito-lemma]] *est* la variation quadratique. Sans elle, pas de $-\sigma^2/2$ dans le mouvement brownien géométrique, pas de compromis thêta–gamma, pas d'équation de Black–Scholes.
 - **La règle en $\sqrt{t}$.** $\mathrm{Var}(W_t) = t$ est la raison pour laquelle la volatilité croît comme la racine carrée de l'horizon : vol quotidienne $\times \sqrt{252}$ = vol annuelle, et une [[value-at-risk|VaR]] à 10 jours vaut $\sqrt{10}$ fois la VaR à 1 jour, exactement seulement sous des accroissements indépendants.
 - **La variance réalisée est une variation quadratique.** $\sum_i r_i^2$ sur une journée estime $\int_0^1 \sigma_s^2\,ds$, et les swaps de variance paient exactement cela. Estimer une volatilité, c'est calculer une variation quadratique, avec l'erreur d'échantillonnage $\sqrt{2/m}$ vue dans l'exemple.
 - **Structure de martingale.** $W$ est la [[martingales|martingale]] continue canonique ; sa martingale exponentielle est la densité qui transforme $\mathbb{P}$ en $\mathbb{Q}$ (Girsanov), changeant la dérive de $\mu$ en $r$ sans toucher à $\sigma$.
@@ -225,7 +225,7 @@ Avec $\Delta_i \sim N(0, \delta_i)$ indépendants, $\mathbb{E}[\sum_i \Delta_i^2
 
 ::: question Établis $\mathbb{P}(\max_{s \le t} W_s \ge a)$ pour $a > 0$ par le principe de réflexion. Évalue-la pour $a = 1$, $t = 1$, et déduis-en si $\mathbb{E}[\tau_a]$ est fini.
 ::: hint
-Sur $\{\tau_a \le t\}$, la trajectoire après $\tau_a$ est un mouvement brownien neuf parti de $a$, donc symétrique autour de $a$.
+Sur $\{\tau_a \le t\}$, la trajectoire après $\tau_a$ est un nouveau mouvement brownien issu de $a$, donc symétrique autour de $a$.
 :::
 ::: answer
 $\{\max_{s \le t} W_s \ge a\} = \{\tau_a \le t\}$. Par la propriété de Markov forte et la symétrie, $\mathbb{P}(\tau_a \le t, W_t \ge a) = \mathbb{P}(\tau_a \le t, W_t \le a)$ ; comme $\{W_t \ge a\} \subseteq \{\tau_a \le t\}$, en additionnant on obtient $\mathbb{P}(\tau_a \le t) = 2\,\mathbb{P}(W_t \ge a) = 2\big(1 - \Phi(a/\sqrt{t})\big)$. Pour $a = t = 1$ : $2(1 - \Phi(1)) \approx 0{,}317$. En dérivant, $\tau_a$ a pour densité $\dfrac{a}{\sqrt{2\pi t^3}} e^{-a^2/(2t)} \sim t^{-3/2}$, donc $\int_0^\infty t\,f(t)\,dt = \infty$ : le niveau est atteint presque sûrement, mais avec un temps d'attente espéré infini, le jumeau en temps continu du résultat sur la marche aléatoire dans [[martingales]]. Financièrement : la probabilité qu'un log-prix sans dérive touche une barrière $a$ avant $t$ vaut $2\big(1 - \Phi(a/(\sigma\sqrt{t}))\big)$.

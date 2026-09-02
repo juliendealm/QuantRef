@@ -11,7 +11,7 @@ related: [greeks, linear-regression]
 
 ## Intuition
 
-« Avec 99 % de confiance, nous ne perdrons pas plus de 2,6 % demain. » Cette phrase est une Value at Risk. Trace la distribution de la perte de demain et avance depuis la gauche jusqu'à laisser 99 % de la masse de probabilité derrière toi : la perte à cet endroit est $\mathrm{VaR}_{0.99}$.
+« Avec 99 % de confiance, nous ne perdrons pas plus de 2,6 % demain. » Cette phrase est une Value at Risk. Trace la distribution de la perte de demain et avance depuis la gauche jusqu'à laisser 99 % de la masse de probabilité derrière toi : la perte à cet endroit est $\mathrm{VaR}_{0{,}99}$.
 
 La VaR dit deux choses utiles et en cache une. Elle dit à quel point une « mauvaise journée ordinaire » est mauvaise — la frontière de la queue — et elle le dit en devise, ce qui permet à un responsable de desk de comparer un book actions avec un book taux. Elle ne dit **pas** à quel point les choses se dégradent *au-delà* de la frontière : une VaR de 1 M t'apprend que 1 % des jours perdent plus de 1 M, pas si « plus » signifie 1,1 M ou 50 M. Cet angle mort est la raison d'être de l'expected shortfall.
 
@@ -33,7 +33,7 @@ Si $L \sim \mathcal{N}(\mu, \sigma^2)$ et $z_\alpha = \Phi^{-1}(\alpha)$,
 $$
 \mathrm{VaR}_\alpha = \mu + \sigma z_\alpha, \qquad \mathrm{ES}_\alpha = \mu + \sigma\,\frac{\varphi(z_\alpha)}{1 - \alpha}.
 $$
-Pour $\alpha = 0.99$ : $z_\alpha = 2.326$ et $\varphi(z_\alpha)/(1-\alpha) = 2.665$.
+Pour $\alpha = 0{,}99$ : $z_\alpha = 2{,}326$ et $\varphi(z_\alpha)/(1-\alpha) = 2{,}665$.
 :::
 
 ::: formula Expected shortfall
@@ -67,18 +67,18 @@ $$
 $$
 \mathbb{E}[Z \mid Z > z_\alpha] = \frac{1}{1-\alpha}\int_{z_\alpha}^{\infty} z\varphi(z)\,dz = \frac{1}{1-\alpha}\Big[-\varphi(z)\Big]_{z_\alpha}^{\infty} = \frac{\varphi(z_\alpha)}{1-\alpha},
 $$
-et $\mathrm{ES}_\alpha = \mu + \sigma\,\mathbb{E}[Z \mid Z > z_\alpha]$. Le rapport $\mathrm{ES}/\mathrm{VaR}$ vaut $1.15$ à 99 % pour une normale et tend vers 1 quand $\alpha \to 1$ : la queue normale est fine, donc la moyenne au-delà du quantile dépasse à peine le quantile.
+et $\mathrm{ES}_\alpha = \mu + \sigma\,\mathbb{E}[Z \mid Z > z_\alpha]$. Pour $\mu = 0$, le rapport $\mathrm{ES}/\mathrm{VaR}$ vaut $\varphi(z_\alpha)/((1-\alpha)z_\alpha) = 1{,}15$ à 99 % pour une normale et tend vers 1 quand $\alpha \to 1$ : la queue normale est fine, donc la moyenne au-delà du quantile dépasse à peine le quantile.
 
 **Racine du temps.** Si les rendements quotidiens $r_1, \dots, r_h$ sont i.i.d. $\mathcal{N}(0, \sigma^2)$, le rendement à $h$ jours suit $\mathcal{N}(0, h\sigma^2)$, donc son quantile vaut $\sqrt{h}$ fois le quantile quotidien — la même croissance linéaire de la variance que dans un [[brownian-motion|mouvement brownien]]. Les deux ingrédients comptent : l'indépendance donne la variance $h\sigma^2$, et la normalité garantit que la distribution à $h$ jours a la même *forme* que la distribution quotidienne, de sorte que le quantile suit l'écart-type. Avec une dérive $\mu \ne 0$, l'expression correcte est $-\mu h + \sigma\sqrt{h}\,z_\alpha$ ; la dérive est négligeable à 1–10 jours et dominante à un an.
 
 **Pourquoi la VaR n'est pas sous-additive : deux obligations.** Deux obligations indépendantes perdent chacune 100 avec probabilité 4 % (défaut, recouvrement nul) et 0 sinon. À $\alpha = 95\,\%$ :
 
-- Une obligation seule : $\mathbb{P}(L \ge 100) = 4\,\% < 5\,\%$, donc le quantile à 95 % vaut 0 : $\mathrm{VaR}_{0.95} = 0$ pour chaque obligation prise isolément.
-- Les deux ensemble : $\mathbb{P}(\text{au moins un défaut}) = 1 - 0.96^2 = 7.84\,\% > 5\,\%$, donc $\mathrm{VaR}_{0.95} = 100$.
+- Une obligation seule : $\mathbb{P}(L \ge 100) = 4\,\% < 5\,\%$, donc le quantile à 95 % vaut 0 : $\mathrm{VaR}_{0{,}95} = 0$ pour chaque obligation prise isolément.
+- Les deux ensemble : $\mathbb{P}(\text{au moins un défaut}) = 1 - 0{,}96^2 = 7{,}84\,\% > 5\,\%$, donc $\mathrm{VaR}_{0{,}95} = 100$.
 
-$\mathrm{VaR}(A + B) = 100 > 0 + 0 = \mathrm{VaR}(A) + \mathrm{VaR}(B)$ : diversifier a *augmenté* le chiffre de risque. L'ES répare cela. Pour une obligation, $\mathrm{ES}_{0.95} = \frac{1}{0.05}\int_{0.95}^{1} \mathrm{VaR}_u\,du = \frac{0.04 \times 100}{0.05} = 80$. Pour la paire, la perte vaut 100 avec probabilité $2 \times 0.04 \times 0.96 = 7.68\,\%$ et 200 avec probabilité $0.04^2 = 0.16\,\%$, donc
+$\mathrm{VaR}(A + B) = 100 > 0 + 0 = \mathrm{VaR}(A) + \mathrm{VaR}(B)$ : diversifier a *augmenté* le chiffre de risque. L'ES répare cela. Pour une obligation, $\mathrm{ES}_{0{,}95} = \frac{1}{0{,}05}\int_{0{,}95}^{1} \mathrm{VaR}_u\,du = \frac{0{,}04 \times 100}{0{,}05} = 80$. Pour la paire, la perte vaut 100 avec probabilité $2 \times 0{,}04 \times 0{,}96 = 7{,}68\,\%$ et 200 avec probabilité $0{,}04^2 = 0{,}16\,\%$, donc
 $$
-\mathrm{ES}_{0.95}(A + B) = \frac{(0.9984 - 0.95)\times 100 + 0.0016 \times 200}{0.05} = 103.2 \le 80 + 80.
+\mathrm{ES}_{0{,}95}(A + B) = \frac{(0{,}9984 - 0{,}95)\times 100 + 0{,}0016 \times 200}{0{,}05} = 103{,}2 \le 80 + 80.
 $$
 La sous-additivité tient, comme elle le doit pour toute mesure cohérente.
 
@@ -86,7 +86,7 @@ La sous-additivité tient, comme elle le doit pour toute mesure cohérente.
 $$
 \mathrm{LR}_{\text{POF}} = -2\ln\frac{(1-p)^{\,n-x}\,p^{\,x}}{(1 - x/n)^{\,n-x}\,(x/n)^{\,x}} \;\sim\; \chi^2_1 \quad \text{sous } H_0
 $$
-rejette le modèle quand le taux d'exceptions est trop élevé *ou* trop faible (trop faible signifie que du capital est gaspillé). Avec $n = 250$ et $\alpha = 0.99$, on attend 2,5 exceptions ; la région de rejet à 5 % est $x \ge 7$ (et $x = 0$, avec une $p$-valeur de 0,025). L'extension de Christoffersen teste aussi que les exceptions ne se regroupent pas : une exception aujourd'hui ne doit pas en rendre une plus probable demain.
+rejette le modèle quand le taux d'exceptions est trop élevé *ou* trop faible (trop faible signifie que du capital est gaspillé). Avec $n = 250$ et $\alpha = 0{,}99$, on attend 2,5 exceptions ; la région de rejet à 5 % est $x \ge 7$ (et $x = 0$, avec une $p$-valeur de 0,025). L'extension de Christoffersen teste aussi que les exceptions ne se regroupent pas : une exception aujourd'hui ne doit pas en rendre une plus probable demain.
 
 ## Hypothèses et cas limites
 
@@ -146,13 +146,13 @@ exceptions: expected 20, observed 34, Kupiec p-value 0.0042
 ```
 :::
 
-Lecture des chiffres : à écart-type égal, l'ajustement normal place la VaR à 99 % à $2.33\sigma \approx 2.1\,\%$, alors que le vrai quantile à queues épaisses vaut $2.62\,\%$ et la vraie moyenne de queue $4.04\,\%$ — presque le double de ce que prédit la normale. L'estimation historique tombe entre les deux : proche pour la VaR, encore loin pour l'ES, parce que 20 observations de queue ne suffisent pas à cerner une queue de $t_3$. Le test de Kupiec rejette franchement le modèle normal : 34 exceptions là où 20 étaient attendues.
+Lecture des chiffres : à écart-type égal, l'ajustement normal place la VaR à 99 % à $2{,}33\sigma \approx 2{,}1\,\%$, alors que le vrai quantile à queues épaisses vaut $2{,}62\,\%$ et la vraie moyenne de queue $4{,}04\,\%$ — presque le double de ce que prédit la normale. L'estimation historique tombe entre les deux : proche pour la VaR, encore loin pour l'ES, parce que 20 observations de queue ne suffisent pas à cerner une queue de $t_3$. Le test de Kupiec rejette franchement le modèle normal : 34 exceptions là où 20 étaient attendues.
 
 L'écart entre l'ES normale et la vraie ES, c'est l'histoire de 2008 en une ligne : des modèles calibrés sur la variance ont placé la frontière de la queue à peu près au bon endroit et la *profondeur* de la queue complètement à côté.
 
 ## Pourquoi c'est important en finance quantitative
 
-- **Capital et limites.** Chaque desk de trading opère sous une limite de VaR ; le chiffre de risque décide de ce qu'un desk peut détenir, et le capital réglementaire pour risque de marché en est construit.
+- **Capital et limites.** Chaque desk de trading opère sous une limite de VaR ; le chiffre de risque décide de ce qu'un desk peut détenir, et et le capital réglementaire au titre du risque de marché en découle.
 - **Contexte bâlois.** L'amendement de 1996 sur le risque de marché à Bâle I a autorisé les banques à utiliser une VaR interne à 10 jours et 99 %, multipliée par au moins 3, le multiplicateur étant relevé selon un backtest sur 250 jours (le « feu tricolore » : vert jusqu'à 4 exceptions, jaune de 5 à 9, rouge à 10 et plus). Après 2008, Bâle 2.5 a ajouté une *VaR stressée* calculée sur une fenêtre de crise, et la revue fondamentale du portefeuille de négociation (FRTB, finalisée en 2019) a remplacé la VaR par une expected shortfall à 97,5 % calculée sur des horizons de liquidité de 10 à 120 jours — précisément parce que la VaR n'est pas cohérente et ne dit rien de la profondeur de la queue. FRTB backteste toujours avec les exceptions de VaR à 97,5 % et 99 %, car une exception d'ES n'est pas directement observable.
 - **L'ES est une espérance conditionnelle.** $\mathrm{ES} = \mathbb{E}[L \mid L \ge \mathrm{VaR}]$ est un conditionnement par l'événement de queue, voir [[conditional-probability]] ; la décomposition d'Euler $\mathrm{ES}(L) = \sum_i \mathbb{E}[L_i \mid L \ge \mathrm{VaR}_\alpha]$ attribue la queue aux positions individuelles.
 - **Books d'options.** La VaR paramétrique utilise le delta et le gamma de chaque position ([[greeks]]) : la VaR delta-normale vaut $z_\alpha\sqrt{\delta^\top \Sigma\, \delta}$, la version delta-gamma ajoute le terme du second ordre. Les deux cassent pour de grands mouvements ; le Monte Carlo avec réévaluation complète sous le modèle de pricing ([[black-scholes]] ou mieux) est l'alternative honnête.
@@ -162,7 +162,7 @@ L'écart entre l'ES normale et la vraie ES, c'est l'histoire de 2008 en une lign
 ## Erreurs fréquentes
 
 ::: pitfall Lire la VaR comme le pire cas
-$\mathrm{VaR}_{0.99}$ est le *meilleur* des 1 % pires jours, pas le pire. La perte attendue un mauvais jour est l'ES, qui avec des queues épaisses peut valoir le double de la VaR.
+$\mathrm{VaR}_{0{,}99}$ est le *meilleur* des 1 % pires jours, pas le pire. La perte attendue un mauvais jour est l'ES, qui avec des queues épaisses peut valoir le double de la VaR.
 :::
 
 ::: pitfall Multiplier par $\sqrt{h}$ une VaR à queues épaisses ou autocorrélée
@@ -179,15 +179,15 @@ Comme la VaR n'est pas sous-additive, la somme des VaR des desks peut être *inf
 
 ## Révision en 30 secondes
 
-La VaR au niveau $\alpha$ est le quantile d'ordre $\alpha$ de la perte sur un horizon : $\mu + \sigma z_\alpha$ dans le cas normal, sinon le quantile empirique ou simulé. Elle n'est pas sous-additive (deux obligations à 4 % de défaut : $\mathrm{VaR}_{0.95}$ vaut 0 pour chacune, 100 pour les deux) et aveugle au-delà du quantile ; l'expected shortfall $\mathbb{E}[L \mid L \ge \mathrm{VaR}]$ corrige les deux défauts et c'est ce que Bâle (FRTB) utilise désormais à 97,5 %. Multiplie par $\sqrt{h}$ seulement pour des rendements i.i.d. normaux. Backteste en comptant les exceptions : $\mathrm{Binomiale}(n, 1-\alpha)$ sous l'hypothèse nulle, test du rapport de vraisemblance de Kupiec.
+La VaR au niveau $\alpha$ est le quantile d'ordre $\alpha$ de la perte sur un horizon : $\mu + \sigma z_\alpha$ dans le cas normal, sinon le quantile empirique ou simulé. Elle n'est pas sous-additive (deux obligations à 4 % de défaut : $\mathrm{VaR}_{0{,}95}$ vaut 0 pour chacune, 100 pour les deux) et aveugle au-delà du quantile ; l'expected shortfall $\mathbb{E}[L \mid L \ge \mathrm{VaR}]$ corrige les deux défauts et c'est ce que Bâle (FRTB) utilise désormais à 97,5 %. Multiplie par $\sqrt{h}$ seulement pour des rendements i.i.d. normaux. Backteste en comptant les exceptions : $\mathrm{Binomiale}(n, 1-\alpha)$ sous l'hypothèse nulle, test du rapport de vraisemblance de Kupiec.
 
 ## Formules clés
 
 | Nom | Formule |
 |---|---|
 | Définition | $\mathrm{VaR}_\alpha(L) = \inf\{\ell : \mathbb{P}(L \le \ell) \ge \alpha\}$ |
-| VaR normale | $\mu + \sigma z_\alpha$, avec $z_{0.99} = 2.326$ |
-| ES normale | $\mu + \sigma\,\varphi(z_\alpha)/(1-\alpha) = \mu + 2.665\,\sigma$ à 99 % |
+| VaR normale | $\mu + \sigma z_\alpha$, avec $z_{0{,}99} = 2{,}326$ |
+| ES normale | $\mu + \sigma\,\varphi(z_\alpha)/(1-\alpha) = \mu + 2{,}665\,\sigma$ à 99 % |
 | Expected shortfall | $\mathrm{ES}_\alpha = \frac{1}{1-\alpha}\int_\alpha^1 \mathrm{VaR}_u\,du = \mathbb{E}[L \mid L \ge \mathrm{VaR}_\alpha]$ |
 | Mise à l'échelle temporelle (i.i.d. normal) | $\mathrm{VaR}^{(h)} = \sqrt{h}\,\mathrm{VaR}^{(1)}$ |
 | Test de Kupiec | $x \sim \mathrm{Bin}(n, 1-\alpha)$ sous $H_0$ ; $\mathrm{LR}_{\text{POF}} \sim \chi^2_1$ |
@@ -196,10 +196,10 @@ La VaR au niveau $\alpha$ est le quantile d'ordre $\alpha$ de la perte sur un ho
 
 ::: question Le P&L quotidien d'un portefeuille est normal, de moyenne nulle et d'écart-type 2 M. Quelles sont ses VaR à 99 % à 1 jour et à 10 jours ?
 ::: hint
-$z_{0.99} = 2.326$, et réfléchis à la façon dont la variance croît avec l'horizon.
+$z_{0{,}99} = 2{,}326$, et réfléchis à la façon dont la variance croît avec l'horizon.
 :::
 ::: answer
-VaR à 1 jour $= 2.326 \times 2 = 4.65$ M. Sous normalité i.i.d., l'écart-type à 10 jours vaut $\sqrt{10} \times 2$ M, donc la VaR à 10 jours vaut $\sqrt{10} \times 4.65 = 14.7$ M. La relance est toujours « quand est-ce que $\sqrt{10}$ est faux ? » : rendements autocorrélés, clustering de volatilité, queues épaisses, positions non linéaires, ou une dérive qui compte à long horizon.
+VaR à 1 jour $= 2{,}326 \times 2 = 4{,}65$ M. Sous normalité i.i.d., l'écart-type à 10 jours vaut $\sqrt{10} \times 2$ M, donc la VaR à 10 jours vaut $\sqrt{10} \times 4{,}65 = 14{,}7$ M. La relance est toujours « quand est-ce que $\sqrt{10}$ est faux ? » : rendements autocorrélés, clustering de volatilité, queues épaisses, positions non linéaires, ou une dérive qui compte à long horizon.
 :::
 :::
 
@@ -208,16 +208,16 @@ VaR à 1 jour $= 2.326 \times 2 = 4.65$ M. Sous normalité i.i.d., l'écart-type
 Lequel des quatre axiomes échoue ? Construis un portefeuille où la diversification a l'air mauvaise.
 :::
 ::: answer
-La sous-additivité échoue. Deux obligations indépendantes perdant chacune 100 avec probabilité 4 % : chacune seule a $\mathrm{VaR}_{0.95} = 0$ parce qu'un événement à 4 % tient dans la queue à 5 %, mais la paire perd au moins 100 avec probabilité $1 - 0.96^2 = 7.84\,\% > 5\,\%$, donc $\mathrm{VaR}_{0.95} = 100 > 0 + 0$. L'expected shortfall est sous-additive : 80 pour chaque obligation, 103,2 pour la paire.
+La sous-additivité échoue. Deux obligations indépendantes perdant chacune 100 avec probabilité 4 % : chacune seule a $\mathrm{VaR}_{0{,}95} = 0$ parce qu'un événement à 4 % tient dans la queue à 5 %, mais la paire perd au moins 100 avec probabilité $1 - 0{,}96^2 = 7{,}84\,\% > 5\,\%$, donc $\mathrm{VaR}_{0{,}95} = 100 > 0 + 0$. L'expected shortfall est sous-additive : 80 pour chaque obligation, 103,2 pour la paire.
 :::
 :::
 
 ::: question Tu backtestes une VaR à 99 % à 1 jour sur 250 jours de bourse et tu observes 6 exceptions. Le modèle est-il rejeté ? Que fait le régulateur ?
 ::: hint
-Le nombre d'exceptions attendu est $250 \times 0.01 = 2.5$. Calcule le rapport de vraisemblance de Kupiec et compare-le à un $\chi^2_1$.
+Le nombre d'exceptions attendu est $250 \times 0{,}01 = 2{,}5$. Calcule le rapport de vraisemblance de Kupiec et compare-le à un $\chi^2_1$.
 :::
 ::: answer
-$\mathrm{LR}_{\text{POF}} = -2\big[244\ln 0.99 + 6\ln 0.01\big] + 2\big[244\ln 0.976 + 6\ln 0.024\big] \approx 3.56$, sous la valeur critique à 5 % de 3,84 ($p \approx 0{,}06$) : non rejeté à 5 %, mais de justesse ; 7 exceptions rejetteraient. Dans le schéma bâlois du feu tricolore, 6 exceptions correspondent à la zone jaune : le multiplicateur de capital passe de 3 à 3,5, et la banque doit expliquer les exceptions.
+$\mathrm{LR}_{\text{POF}} = -2\big[244\ln 0{,}99 + 6\ln 0{,}01\big] + 2\big[244\ln 0{,}976 + 6\ln 0{,}024\big] \approx 3{,}56$, sous la valeur critique à 5 % de 3,84 ($p \approx 0{,}06$) : non rejeté à 5 %, mais de justesse ; 7 exceptions rejetteraient. Dans le schéma bâlois du feu tricolore, 6 exceptions correspondent à la zone jaune : le multiplicateur de capital passe de 3 à 3,5, et la banque doit expliquer les exceptions.
 :::
 :::
 

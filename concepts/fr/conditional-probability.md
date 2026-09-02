@@ -63,7 +63,7 @@ La formule des probabilités totales s'obtient en écrivant $A = \bigcup_i (A \c
 ## Hypothèses et cas limites
 
 - **Conditionner par un événement de probabilité nulle.** $\mathbb{P}(A \mid B)$ n'est pas défini si $\mathbb{P}(B) = 0$. Conditionner par une variable continue prenant une valeur exacte ($Y = y$) demande des densités ou la définition mesure-théorique ; un usage naïf mène au paradoxe de Borel–Kolmogorov.
-- **Conditionner n'est pas expliquer.** $\mathbb{P}(A \mid B)$ peut être élevée parce que $B$ cause $A$, parce que $A$ cause $B$, ou parce que les deux partagent une cause commune.
+- **Conditionner n'est pas établir une causalité.** $\mathbb{P}(A \mid B)$ peut être élevée parce que $B$ cause $A$, parce que $A$ cause $B$, ou parce que les deux partagent une cause commune.
 - **L'indépendance n'est pas transitive.** $A \perp B$ et $B \perp C$ n'impliquent pas $A \perp C$ ; et l'indépendance deux à deux n'implique pas l'indépendance mutuelle.
 - **L'indépendance conditionnelle peut apparaître ou disparaître.** Deux événements indépendants peuvent devenir dépendants une fois qu'on conditionne par un troisième (paradoxe de Berkson : parmi les étudiants admis, talent et travail semblent négativement corrélés).
 
@@ -110,7 +110,7 @@ Conditionner en code, c'est littéralement *filtrer puis moyenner* : `total[mask
 - **Un prix est une espérance conditionnelle.** Sous la mesure risque-neutre, le prix à l'instant $t$ d'un flux $H$ vaut $e^{-r(T-t)}\,\mathbb{E}^{\mathbb{Q}}[H \mid \mathcal{F}_t]$. Voir [[martingales]] et [[black-scholes]].
 - **Les filtrations formalisent « ce qui est connu ».** Une [[martingales|martingale]] se définit entièrement par des espérances conditionnelles sachant $\mathcal{F}_t$.
 - **Un signal est un avantage conditionnel.** Un signal de trading est utile si $\mathbb{E}[r_{t+1} \mid \text{signal}_t] \neq \mathbb{E}[r_{t+1}]$. Un backtest estime exactement cette moyenne conditionnelle.
-- **Le risque est conditionnel.** L'expected shortfall vaut $\mathbb{E}[L \mid L > \mathrm{VaR}]$ (voir [[value-at-risk]]) ; un stress test est une espérance conditionnée à un scénario.
+- **Le risque est conditionnel.** L'expected shortfall vaut $\mathbb{E}[L \mid L \ge \mathrm{VaR}]$ (voir [[value-at-risk]]) ; un stress test est une espérance conditionnée à un scénario.
 - **La mise à jour bayésienne** ([[bayes-theorem]]) est un conditionnement répété à mesure que les données arrivent, ce que fait un [[kalman-filter|filtre de Kalman]] à chaque tick.
 
 ## Erreurs fréquentes
@@ -175,6 +175,6 @@ Propriété de tour : $\mathbb{E}[\mathbb{E}[X \mid \mathcal{F}_t] \mid \mathcal
 Pense à deux signaux indépendants et conditionne par leur somme, ou par une règle de sélection qui les a utilisés tous les deux.
 :::
 ::: answer
-Pas en général. Soit $A$ = « la stratégie 1 a gagné » et $B$ = « la stratégie 2 a gagné », indépendants. Conditionne par $C$ = « exactement une des deux a gagné ». Savoir que $A$ s'est produit implique que $B$ ne s'est pas produit : ils sont parfaitement négativement dépendants sachant $C$. C'est le paradoxe de Berkson, qui apparaît dès qu'on analyse un échantillon *sélectionné* (par exemple les fonds qui ont survécu).
+Pas en général. Soit $A$ = « la stratégie 1 a gagné » et $B$ = « la stratégie 2 a gagné », indépendants. Conditionne par $C$ = « exactement une des deux a gagné ». Savoir que $A$ s'est produit implique que $B$ ne s'est pas produit : ils sont parfaitement négativement dépendants sachant $C$. C'est un biais de collision : conditionner par une conséquence commune de $A$ et $B$ crée une dépendance entre eux. Le paradoxe de Berkson est le même mécanisme avec $C = A \cup B$ (« au moins une des deux a gagné »), qui les rend aussi négativement dépendants. Cela apparaît dès qu'on analyse un échantillon *sélectionné*, par exemple les fonds qui ont survécu.
 :::
 :::

@@ -103,7 +103,7 @@ $$
 
 hence $S_T = S_0 \exp\big((\mu - \tfrac12\sigma^2)T + \sigma W_T\big)$. The $-\tfrac12\sigma^2$ is the "volatility drag": the median growth rate is below the mean growth rate $\mu$.
 
-**2. $W_t^2 - t$ is a martingale.** With $f(x) = x^2$: $d(W_t^2) = 2W_t\,dW_t + dt$, so $W_t^2 - t = 2\int_0^t W_s\,dW_s$ is a stochastic integral, hence a [[martingales|martingale]].
+**2. $W_t^2 - t$ is a martingale.** With $f(x) = x^2$: $d(W_t^2) = 2W_t\,dW_t + dt$, so $W_t^2 - t = 2\int_0^t W_s\,dW_s$ is a stochastic integral, hence a local [[martingales|martingale]] — and a true one here, since $\mathbb{E}\int_0^t W_s^2\,ds = t^2/2 < \infty$.
 
 **3. The exponential martingale.** With $f(t, x) = \exp(\lambda x - \tfrac12 \lambda^2 t)$: $\partial_t f = -\tfrac12\lambda^2 f$, $\partial_x f = \lambda f$, $\partial_{xx} f = \lambda^2 f$, so
 
@@ -175,7 +175,7 @@ $(S - K)^+$ is not twice differentiable at $K$. Apply the lemma to the smooth pr
 :::
 
 ::: pitfall Dropping the correlation in the cross term
-In two dimensions the second-order term contains $\partial_{12} f\,\rho\,\sigma_1\sigma_2\,dt$. Forgetting it is the standard error in exchange-option, quanto and basket calculations; it changes the drift of a ratio $S^1/S^2$ by $\sigma_2^2 - \rho\sigma_1\sigma_2$.
+In two dimensions the second-order term contains $\partial_{12} f\,\rho\,\sigma_1\sigma_2\,dt$. Forgetting it is the standard error in exchange-option, quanto and basket calculations; forgetting the cross term alone changes the drift of a ratio $S^1/S^2$ by $\rho\sigma_1\sigma_2$, while applying the ordinary quotient rule misses both corrections, $\sigma_2^2 - \rho\sigma_1\sigma_2$.
 :::
 
 ::: pitfall Confusing the Itô and Stratonovich integrals

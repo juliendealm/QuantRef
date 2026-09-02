@@ -58,7 +58,7 @@ $$
 :::
 
 ::: formula Delta-hedging P&L
-Hedging continuously at the implied volatility $\sigma_{\text{impl}}$ while the stock actually moves with volatility $\sigma_{\text{real}}$ earns, over $dt$,
+Hedging continuously at the implied volatility $\sigma_{\text{impl}}$, marking the book at that same constant $\sigma_{\text{impl}}$, while the stock actually moves with volatility $\sigma_{\text{real}}$ earns, over $dt$ (here $\Gamma$ is the Black-Scholes gamma evaluated at $\sigma_{\text{impl}}$),
 $$
 d\,\mathrm{P\&L} = \tfrac12\,\Gamma\,S^2\,\big(\sigma_{\text{real}}^2 - \sigma_{\text{impl}}^2\big)\,dt .
 $$
@@ -105,14 +105,14 @@ $$
 d\,\mathrm{P\&L} = \tfrac12\Gamma S^2\big(\sigma_{\text{real}}^2 - \sigma_{\text{impl}}^2\big)\,dt .
 $$
 
-Integrated to expiry, $\mathrm{P\&L} = \int_0^T \tfrac12\Gamma_t S_t^2\big(\sigma_{\text{real},t}^2 - \sigma_{\text{impl}}^2\big)\,dt$. The gamma sits inside the integral: the P&L is path-dependent, and realised variance only counts where the option has gamma, i.e. near the strike.
+Integrated to expiry, and carrying each day's gain to expiry at the risk-free rate, $\mathrm{P\&L} = \int_0^T e^{r(T-t)}\,\tfrac12\Gamma_t S_t^2\big(\sigma_{\text{real},t}^2 - \sigma_{\text{impl}}^2\big)\,dt$. The gamma sits inside the integral: the P&L is path-dependent, and realised variance only counts where the option has gamma, i.e. near the strike.
 
 ## Assumptions & Edge Cases
 
 - **Model dependence.** The closed forms above are Black–Scholes Greeks and assume constant volatility. With a smile, the delta depends on how implied vol is assumed to move with spot: "sticky strike" gives $\Delta_{BS}$, "sticky delta" gives $\Delta_{BS} + \nu\,\partial\sigma_{\text{impl}}/\partial S$. Desks argue about this daily.
 - **Near expiry, at the money.** $\Gamma$ and $\Theta$ blow up like $1/\sqrt{T}$: delta flips between 0 and 1 on tiny moves (pin risk). Vega goes to zero like $\sqrt{T}$.
 - **Away from the money.** $\Gamma$ and $\nu$ vanish; the option becomes either a forward ($\Delta \to 1$) or nothing ($\Delta \to 0$).
-- **Where the peaks are.** Gamma and vega are maximal near the at-the-money-forward strike; gamma peaks slightly below it and vega slightly above, because of the $\tfrac12\sigma^2 T$ shift inside $d_1$.
+- **Where the peaks are.** As a function of spot, both gamma and vega peak near the forward $Ke^{-rT}$, but not at the same place: gamma peaks at $S = Ke^{-(r + \frac32\sigma^2)T}$, slightly below, and vega at $S = Ke^{(\frac12\sigma^2 - r)T}$, slightly above. Both contain the same $\varphi(d_1)$; what separates them is the extra $1/S$ in gamma against the extra $S$ in vega.
 - **Theta can be positive.** A deep in-the-money European put earns theta (the term $rKe^{-rT}N(-d_2)$ dominates): you are owed $K$ and get closer to receiving it. Similarly for a call on a stock with a large dividend yield.
 - **Additivity.** Greeks are linear in the position, so a book's Greeks are the sum of its positions'. That is why risk is aggregated and limited by Greek, but it only holds per underlying and, for vega, per expiry bucket.
 - **The P&L formula is the gamma leg only.** It ignores discrete-hedging noise, transaction costs, and the vega P&L from a change in implied volatility while you hold the position.

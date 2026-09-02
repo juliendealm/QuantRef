@@ -91,7 +91,7 @@ $$
 \mathbb{P}(\text{sick} \mid +) = \frac{0.99 \times 0.01}{0.99 \times 0.01 + 0.05 \times 0.99} = \frac{0.0099}{0.0594} \approx 0.167.
 $$
 
-In odds: prior odds $1/99 \approx 0.0101$, likelihood ratio $0.99/0.05 = 19.8$, posterior odds $0.2$, i.e. $1/6$. A second, conditionally independent positive test multiplies the odds by $19.8$ again: $3.96$, so $\mathbb{P} \approx 0.80$. Replace "sick" by "crash regime" and "test" by "signal fired" and you have the arithmetic of every alerting system.
+In odds: prior odds $1/99 \approx 0.0101$, likelihood ratio $0.99/0.05 = 19.8$, posterior odds $0.2$, i.e. a probability of $1/6$. A second, conditionally independent positive test multiplies the odds by $19.8$ again: $3.96$, so $\mathbb{P} \approx 0.80$. Replace "sick" by "crash regime" and "test" by "signal fired" and you have the arithmetic of every alerting system.
 
 The Beta–Binomial part below watches a flat prior learn the bias of a coin with $\theta = 0.6$ one flip at a time:
 
@@ -144,7 +144,7 @@ After 10 flips the posterior still sits at $0.42$ with a standard deviation of $
 
 - **Signal reliability is a base-rate question.** A crash indicator that fires before 90 % of crashes and in 5 % of normal months, with crashes in 2 % of months, gives $\mathbb{P}(\text{crash} \mid \text{fired}) \approx 0.27$: most alerts are false. Precision, not hit rate, is what the P&L sees.
 - **Regime detection is sequential Bayes.** In a hidden Markov / Markov-switching model, the filtered probability $\mathbb{P}(S_t = \text{bear} \mid r_{1:t})$ is obtained by a *predict* step (apply the transition matrix to yesterday's posterior) and an *update* step (multiply by the likelihood of today's return under each regime, renormalise). This is the Hamilton filter.
-- **The [[kalman-filter|Kalman filter]] is Bayes with Gaussian conjugacy.** Gaussian prior on the state, Gaussian likelihood of the observation, Gaussian posterior; the Kalman gain is the precision-weighted average of the Beta–Binomial formula in disguise.
+- **The [[kalman-filter|Kalman filter]] is Bayes with Gaussian conjugacy.** Gaussian prior on the state, Gaussian likelihood of the observation, Gaussian posterior; the Kalman gain is a precision-weighted average, the Beta–Binomial formula in disguise.
 - **Shrinkage.** Bayesian posterior means pull noisy estimates toward the prior: Black–Litterman blends equilibrium returns with views, and a strategy's hit rate estimated from 20 trades should be shrunk hard toward 50 %.
 - **Backtest overfitting.** If only 1 strategy in 100 tried has genuine edge, and a backtest at the 5 % level passes 80 % of genuine strategies, then $\mathbb{P}(\text{genuine} \mid \text{passes}) = 0.008/(0.008 + 0.0495) \approx 0.14$. Most published backtests are false positives for exactly the medical-test reason.
 - **Conditioning on information** in general is the subject of [[conditional-probability]]; Bayes is the tool that makes conditioning on *observations* computable.

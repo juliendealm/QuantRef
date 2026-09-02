@@ -88,10 +88,10 @@ Le théorème de Bayes, c'est la [[conditional-probability|règle de multiplicat
 Un test détecte une maladie présente chez 1 % de la population, avec une sensibilité de 99 % et un taux de faux positifs de 5 %. Que vaut $\mathbb{P}(\text{malade} \mid \text{positif})$ ?
 
 $$
-\mathbb{P}(\text{malade} \mid +) = \frac{0.99 \times 0.01}{0.99 \times 0.01 + 0.05 \times 0.99} = \frac{0.0099}{0.0594} \approx 0.167.
+\mathbb{P}(\text{malade} \mid +) = \frac{0{,}99 \times 0{,}01}{0{,}99 \times 0{,}01 + 0{,}05 \times 0{,}99} = \frac{0{,}0099}{0{,}0594} \approx 0{,}167.
 $$
 
-En cotes : cotes a priori $1/99 \approx 0{,}0101$, rapport de vraisemblance $0{,}99/0{,}05 = 19{,}8$, cotes a posteriori $0{,}2$, soit $1/6$. Un second test positif, conditionnellement indépendant, multiplie encore les cotes par $19{,}8$ : $3{,}96$, donc $\mathbb{P} \approx 0{,}80$. Remplace « malade » par « régime de krach » et « test » par « signal déclenché », et tu as l'arithmétique de tout système d'alerte.
+En cotes : cotes a priori $1/99 \approx 0{,}0101$, rapport de vraisemblance $0{,}99/0{,}05 = 19{,}8$, cotes a posteriori $0{,}2$, soit une probabilité de $1/6$. Un second test positif, conditionnellement indépendant, multiplie encore les cotes par $19{,}8$ : $3{,}96$, donc $\mathbb{P} \approx 0{,}80$. Remplace « malade » par « régime de krach » et « test » par « signal déclenché », et tu as l'arithmétique de tout système d'alerte.
 
 La partie Bêta–Binomiale ci-dessous regarde un prior plat apprendre le biais d'une pièce avec $\theta = 0{,}6$, un lancer à la fois :
 
@@ -138,7 +138,7 @@ n=50  Beta(31,21)  mean=0.596  sd=0.067
 ```
 :::
 
-Après 10 lancers, le posterior est encore à $0{,}42$ avec un écart-type de $0{,}14$ : une série de faces dans un petit échantillon domine. Après 50 lancers, il est passé à $0{,}60 \pm 0{,}07$. L'écart-type a posteriori décroît à peu près comme $1/\sqrt{n}$, ce qui est le visage bayésien de la loi des grands nombres.
+Après 10 lancers, le posterior est encore à $0{,}42$ avec un écart-type de $0{,}14$ : une série de piles dans un petit échantillon domine. Après 50 lancers, il est passé à $0{,}60 \pm 0{,}07$. L'écart-type a posteriori décroît à peu près comme $1/\sqrt{n}$, ce qui est le visage bayésien de la loi des grands nombres.
 
 ## Pourquoi c'est important en finance quantitative
 
@@ -189,16 +189,16 @@ Bayes renverse le conditionnement : $\mathbb{P}(A \mid B) = \mathbb{P}(B \mid A)
 Calcule les deux façons d'obtenir un résultat positif : malade et détecté, sain et fausse alerte.
 :::
 ::: answer
-$\mathbb{P}(\text{malade} \mid +) = \dfrac{0.99 \times 0.001}{0.99 \times 0.001 + 0.01 \times 0.999} = \dfrac{0.00099}{0.01098} \approx 0.090$. Environ 9 % : les fausses alertes parmi les 99,9 % de gens sains sont dix fois plus nombreuses que les vrais positifs. En cotes : $\frac{1}{999} \times 99 \approx 0{,}099$.
+$\mathbb{P}(\text{malade} \mid +) = \dfrac{0{,}99 \times 0{,}001}{0{,}99 \times 0{,}001 + 0{,}01 \times 0{,}999} = \dfrac{0{,}00099}{0{,}01098} \approx 0{,}090$. Environ 9 % : les fausses alertes parmi les 99,9 % de gens sains sont dix fois plus nombreuses que les vrais positifs. En cotes : $\frac{1}{999} \times 99 \approx 0{,}099$.
 :::
 :::
 
-::: question Un sac contient une pièce équilibrée et une pièce à deux faces « pile ». Tu en tires une au hasard, tu la lances trois fois et tu obtiens trois piles. Quelle est la probabilité de tenir la pièce truquée ? Comment la réponse évolue-t-elle lancer après lancer ?
+::: question Un sac contient une pièce équilibrée et une pièce truquée qui tombe toujours sur face. Tu en tires une au hasard, tu la lances trois fois et tu obtiens trois faces. Quelle est la probabilité de tenir la pièce truquée ? Comment la réponse évolue-t-elle lancer après lancer ?
 ::: hint
-Les cotes a priori sont 1:1. Chaque pile est deux fois plus probable avec la pièce truquée.
+Les cotes a priori sont 1:1. Chaque face est deux fois plus probable avec la pièce truquée.
 :::
 ::: answer
-Vraisemblances : $1$ pour la pièce truquée, $(1/2)^3 = 1/8$ pour la pièce équilibrée. Posterior $= \dfrac{1 \cdot \frac12}{1 \cdot \frac12 + \frac18 \cdot \frac12} = \dfrac{8}{9} \approx 0{,}889$. Séquentiellement, chaque pile a $LR = 2$, donc les cotes vont $1 \to 2 \to 4 \to 8$, soit des probabilités $1/2 \to 2/3 \to 4/5 \to 8/9$. Une seule face enverrait les cotes à 0, puisque la pièce truquée ne peut pas la produire.
+Vraisemblances : $1$ pour la pièce truquée, $(1/2)^3 = 1/8$ pour la pièce équilibrée. Posterior $= \dfrac{1 \cdot \frac12}{1 \cdot \frac12 + \frac18 \cdot \frac12} = \dfrac{8}{9} \approx 0{,}889$. Séquentiellement, chaque face a $LR = 2$, donc les cotes vont $1 \to 2 \to 4 \to 8$, soit des probabilités $1/2 \to 2/3 \to 4/5 \to 8/9$. Un seul pile enverrait les cotes à 0, puisque la pièce truquée ne peut pas le produire.
 :::
 :::
 

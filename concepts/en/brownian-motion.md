@@ -41,14 +41,14 @@ Equivalently, Brownian motion is the centred Gaussian process with continuous pa
 
 ::: formula Donsker's invariance principle
 $$
-W^{(n)}_t = \frac{S_{\lfloor nt \rfloor}}{\sqrt{n}} \;\xrightarrow[n \to \infty]{d}\; W_t
+W^{(n)}_t = \frac{S_{\lfloor nt \rfloor}}{\sqrt{n}}, \qquad W^{(n)} \;\underset{n \to \infty}{\Longrightarrow}\; W \ \text{ in } D[0,T]
 $$
-as processes on $[0, T]$: the law of the whole path converges, not only each marginal. The limit does not depend on the law of $\xi$, hence "invariance".
+Convergence is in distribution on the path space $D[0,T]$ with the Skorokhod topology: the law of the whole path converges, not only each marginal. The limit does not depend on the law of $\xi$, hence "invariance".
 :::
 
 **Key facts.**
 
-- *Scaling and symmetries.* For $c > 0$, $(c^{-1/2} W_{ct})_{t \ge 0}$ is a Brownian motion. So are $-W_t$ (reflection), $W_{t+s} - W_s$ (fresh start at $s$), and $t\,W_{1/t}$ (time inversion).
+- *Scaling and symmetries.* For $c > 0$, $(c^{-1/2} W_{ct})_{t \ge 0}$ is a Brownian motion. So are $-W_t$ (reflection), $W_{t+s} - W_s$ (fresh start at $s$), and $t\,W_{1/t}$ for $t > 0$, set to $0$ at $t = 0$ (time inversion; continuity at the origin is the non-trivial part).
 - *Quadratic variation.* For partitions $0 = t_0 < \cdots < t_n = t$ with mesh $\max_i (t_i - t_{i-1}) \to 0$:
 
 ::: formula Quadratic variation
@@ -60,7 +60,7 @@ In differential shorthand: $(dW_t)^2 = dt$, $dW_t\,dt = 0$, $(dt)^2 = 0$.
 
 - *Regularity.* Paths are Hölder continuous of every order $< 1/2$, but nowhere differentiable and of infinite variation on every interval.
 - *Reflection principle.* With $M_t = \max_{s \le t} W_s$ and $a > 0$, $\mathbb{P}(M_t \ge a) = 2\,\mathbb{P}(W_t \ge a) = 2\big(1 - \Phi(a/\sqrt{t})\big)$. The first passage time $\tau_a = \inf\{t : W_t = a\}$ is finite a.s. but $\mathbb{E}[\tau_a] = \infty$.
-- *Markov and martingale.* $W$ is a (strong) Markov process, and $W_t$, $W_t^2 - t$, $\exp(\sigma W_t - \sigma^2 t/2)$ are [[martingales]]. Lévy's characterisation: any continuous martingale with $[M]_t = t$ is a Brownian motion.
+- *Markov and martingale.* $W$ is a (strong) Markov process, and $W_t$, $W_t^2 - t$, $\exp(\sigma W_t - \sigma^2 t/2)$ are [[martingales]]. Lévy's characterisation: any continuous local martingale $M$ with $M_0 = 0$ and $[M]_t = t$ is a Brownian motion.
 
 ::: formula Geometric Brownian motion
 $$
@@ -98,7 +98,7 @@ using $(dS_t)^2 = \sigma^2 S_t^2\,dt$, which is quadratic variation. Integrating
 - **Continuous but not differentiable.** $dW_t / dt$ does not exist as a function; "white noise" is only a generalised process. Any calculus with $dW$ must be Itô's ([[ito-lemma]]) or Stratonovich's.
 - **Quadratic variation is a limit along partitions.** Convergence is in $L^2$ for any sequence of partitions with mesh $\to 0$, and almost sure along refining (e.g. dyadic) partitions. Taken over *all* partitions, the supremum of $\sum \Delta_i^2$ is infinite.
 - **The model breaks at the tick scale.** Realised variance from ultra-high-frequency returns *increases* with the sampling frequency because of microstructure noise (bid–ask bounce, price discreteness), the opposite of $[W]_t = t$. Brownian motion describes the coarse-grained price.
-- **Geometric Brownian motion: right sign, wrong tail.** Prices stay positive and log-returns are additive, but constant $\sigma$ and i.i.d. Gaussian log-returns are empirically false. The drift $\mu$ governs $\mathbb{E}[S_t]$ while a typical path grows at rate $\mu - \sigma^2/2$: if $\mu < \sigma^2/2$ then $S_t \to 0$ almost surely even though $\mathbb{E}[S_t] \to \infty$.
+- **Geometric Brownian motion: right sign, wrong tail.** Prices stay positive and log-returns are additive, but constant $\sigma$ and i.i.d. Gaussian log-returns are empirically false. The drift $\mu$ governs $\mathbb{E}[S_t]$ while a typical path grows at rate $\mu - \sigma^2/2$: if $\mu < \sigma^2/2$ then $S_t \to 0$ almost surely, and when $0 < \mu < \sigma^2/2$ this happens even though $\mathbb{E}[S_t] \to \infty$.
 - **Several dimensions.** Correlated Brownian motions are built as $W = LZ$ with $L$ a Cholesky factor of the correlation matrix and $Z$ independent Brownian motions; then $d\langle W^i, W^j \rangle_t = \rho_{ij}\,dt$.
 
 ## Worked Example

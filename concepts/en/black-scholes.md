@@ -66,7 +66,7 @@ $$
 
 Reading the formula: $N(d_2) = \mathbb{Q}(S_T > K)$ is the risk-neutral probability of exercise, so $K e^{-rT} N(d_2)$ is the present value of what you expect to pay. $S\,N(d_1) = e^{-rT}\,\mathbb{E}^{\mathbb{Q}}[S_T \mathbf{1}_{S_T > K}]$ is the present value of what you expect to receive, and $N(d_1)$ is also the delta of the call.
 
-With a continuous dividend yield $q$, replace $S$ by $S e^{-qT}$ everywhere and $r$ by $r - q$ inside $d_1$. Black's formula for options on futures is the case $q = r$.
+With a continuous dividend yield $q$, the call is $C = S e^{-qT} N(d_1) - K e^{-rT} N(d_2)$ with $d_1 = \dfrac{\ln(S/K) + (r - q + \tfrac12\sigma^2)T}{\sigma\sqrt{T}}$. Discount the spot by $e^{-qT}$ **or** carry it at $r - q$ inside $d_1$ — the two are the same recipe written twice, so applying both double-counts the dividend. Black's formula for options on futures is the case $q = r$.
 
 ## Derivation
 
@@ -128,7 +128,7 @@ The second term is $K e^{-rT}\,\mathbb{Q}(Z > -d_2) = K e^{-rT} N(d_2)$. For the
 Price a one-year call with $S = 100$, $K = 105$, $r = 3\,\%$, $\sigma = 20\,\%$.
 
 $$
-d_1 = \frac{\ln(100/105) + (0.03 + 0.02)\times 1}{0.20} = \frac{-0.04879 + 0.05}{0.20} = 0.0061, \qquad d_2 = 0.0061 - 0.20 = -0.1939 .
+d_1 = \frac{\ln(100/105) + (0.03 + 0.02)\times 1}{0.20} = \frac{-0.04879 + 0.05}{0.20} = 0.0060, \qquad d_2 = 0.0060 - 0.20 = -0.1940 .
 $$
 
 $N(d_1) = 0.5024$, $N(d_2) = 0.4231$, $K e^{-rT} = 105 \times 0.97045 = 101.90$, so

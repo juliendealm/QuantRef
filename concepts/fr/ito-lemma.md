@@ -103,7 +103,7 @@ $$
 
 d'où $S_T = S_0 \exp\big((\mu - \tfrac12\sigma^2)T + \sigma W_T\big)$. Le $-\tfrac12\sigma^2$ est la « traînée de volatilité » : le taux de croissance médian est inférieur au taux de croissance moyen $\mu$.
 
-**2. $W_t^2 - t$ est une martingale.** Avec $f(x) = x^2$ : $d(W_t^2) = 2W_t\,dW_t + dt$, donc $W_t^2 - t = 2\int_0^t W_s\,dW_s$ est une intégrale stochastique, donc une [[martingales|martingale]].
+**2. $W_t^2 - t$ est une martingale.** Avec $f(x) = x^2$ : $d(W_t^2) = 2W_t\,dW_t + dt$, donc $W_t^2 - t = 2\int_0^t W_s\,dW_s$ est une intégrale stochastique, donc une [[martingales|martingale]] locale — et une vraie martingale ici, puisque $\mathbb{E}\int_0^t W_s^2\,ds = t^2/2 < \infty$.
 
 **3. La martingale exponentielle.** Avec $f(t, x) = \exp(\lambda x - \tfrac12 \lambda^2 t)$ : $\partial_t f = -\tfrac12\lambda^2 f$, $\partial_x f = \lambda f$, $\partial_{xx} f = \lambda^2 f$, donc
 
@@ -158,7 +158,7 @@ Le calcul ordinaire se trompe de presque exactement $T = 1$ sur chaque trajectoi
 ## Pourquoi c'est important en finance quantitative
 
 - **L'EDP de Black–Scholes, c'est Itô plus une couverture.** On applique le lemme au prix de l'option $V(t, S_t)$, on vend $\partial_S V$ actions, et le terme en $dW$ s'annule ; le terme en $dt$ qui survit doit rapporter le taux sans risque. Voir [[black-scholes]].
-- **Le gamma est le terme d'Itô.** La correction $\tfrac12 \sigma^2 S^2\,\partial_{SS} V\,dt$ est le P&L de gamma d'une option couverte et l'origine de l'arbitrage gamma–thêta dans [[greeks]].
+- **Le gamma est le terme d'Itô.** La correction $\tfrac12 \sigma^2 S^2\,\partial_{SS} V\,dt$ est le P&L de gamma d'une option couverte et l'origine du compromis gamma–thêta dans [[greeks]].
 - **Décider ce qui est une martingale.** $f(t, X_t)$ est une martingale (locale) exactement quand son coefficient en $dt$ s'annule ; c'est ainsi qu'on vérifie que les prix actualisés sont des [[martingales]] sous la mesure de pricing.
 - **Changement de mesure.** La martingale exponentielle est la densité de Radon–Nikodym du théorème de Girsanov, qui transforme la dérive réelle $\mu$ en taux sans risque $r$.
 - **Résoudre les EDS linéaires.** La règle du produit appliquée à $e^{\kappa t} X_t$ résout le processus d'Ornstein–Uhlenbeck $dX_t = \kappa(\theta - X_t)\,dt + \sigma\,dW_t$, cheval de bataille des modèles de taux court et du [[kalman-filter|filtre de Kalman]] en temps continu.
@@ -175,7 +175,7 @@ $(S - K)^+$ n'est pas deux fois dérivable en $K$. On applique le lemme à la fo
 :::
 
 ::: pitfall Oublier la corrélation dans le terme croisé
-En dimension deux, le terme du second ordre contient $\partial_{12} f\,\rho\,\sigma_1\sigma_2\,dt$. L'oublier est l'erreur standard dans les calculs d'options d'échange, de quantos et de paniers ; cela change la dérive d'un rapport $S^1/S^2$ de $\sigma_2^2 - \rho\sigma_1\sigma_2$.
+En dimension deux, le terme du second ordre contient $\partial_{12} f\,\rho\,\sigma_1\sigma_2\,dt$. L'oublier est l'erreur standard dans les calculs d'options d'échange, de quantos et de paniers ; oublier le seul terme croisé change la dérive d'un rapport $S^1/S^2$ de $\rho\sigma_1\sigma_2$, tandis qu'appliquer la règle du quotient ordinaire manque les deux corrections, $\sigma_2^2 - \rho\sigma_1\sigma_2$.
 :::
 
 ::: pitfall Confondre les intégrales d'Itô et de Stratonovich

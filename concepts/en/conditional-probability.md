@@ -110,7 +110,7 @@ Conditioning in code is literally *filter, then average*: `total[mask]` is the r
 - **Pricing is conditional expectation.** Under the risk-neutral measure, the price of a payoff $H$ at time $t$ is $e^{-r(T-t)}\,\mathbb{E}^{\mathbb{Q}}[H \mid \mathcal{F}_t]$. See [[martingales]] and [[black-scholes]].
 - **Filtrations formalise "what is known".** A [[martingales|martingale]] is defined entirely through conditional expectations given $\mathcal{F}_t$.
 - **Signals are conditional edges.** A trading signal is useful if $\mathbb{E}[r_{t+1} \mid \text{signal}_t] \neq \mathbb{E}[r_{t+1}]$. Backtests estimate exactly this conditional mean.
-- **Risk is conditional.** Expected shortfall is $\mathbb{E}[L \mid L > \mathrm{VaR}]$ (see [[value-at-risk]]); stress tests are expectations conditioned on a scenario.
+- **Risk is conditional.** Expected shortfall is $\mathbb{E}[L \mid L \ge \mathrm{VaR}]$ (see [[value-at-risk]]); stress tests are expectations conditioned on a scenario.
 - **Bayesian updating** ([[bayes-theorem]]) is repeated conditioning as new data arrive, which is what a [[kalman-filter|Kalman filter]] does every tick.
 
 ## Common Mistakes
@@ -175,6 +175,6 @@ Tower property: $\mathbb{E}[\mathbb{E}[X \mid \mathcal{F}_t] \mid \mathcal{F}_s]
 Think of two independent signals and conditioning on their sum, or on a selection rule that used both.
 :::
 ::: answer
-Not in general. Let $A$ = "strategy 1 made money" and $B$ = "strategy 2 made money", independent. Condition on $C$ = "exactly one of the two made money". Now knowing $A$ occurred implies $B$ did not: they are perfectly negatively dependent given $C$. This is Berkson's paradox and shows up whenever you analyse a *selected* sample (e.g. funds that survived).
+Not in general. Let $A$ = "strategy 1 made money" and $B$ = "strategy 2 made money", independent. Condition on $C$ = "exactly one of the two made money". Now knowing $A$ occurred implies $B$ did not: they are perfectly negatively dependent given $C$. This is collider bias: conditioning on a common consequence of $A$ and $B$ creates dependence between them. Berkson's paradox is the same mechanism with $C = A \cup B$ ("at least one made money"), which also makes them negatively dependent. It shows up whenever you analyse a *selected* sample, e.g. funds that survived.
 :::
 :::

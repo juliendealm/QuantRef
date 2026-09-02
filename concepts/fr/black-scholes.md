@@ -11,7 +11,7 @@ related: [greeks, brownian-motion]
 
 ## Intuition
 
-Une option ne se valorise pas en prévoyant où ira l'action. Elle se valorise par **réplication** : si l'on peut construire un portefeuille d'actions et de cash qui reproduit le payoff de l'option dans tous les scénarios, l'option doit coûter exactement ce que coûte ce portefeuille, sinon il y a un repas gratuit.
+Une option ne se valorise pas en prévoyant où ira l'action. Elle se valorise par **réplication** : si l'on peut construire un portefeuille d'actions et de cash qui reproduit le payoff de l'option dans tous les scénarios, l'option doit coûter exactement ce que coûte ce portefeuille, sinon il y a un déjeuner gratuit.
 
 Black et Scholes ont montré que lorsque l'action suit un mouvement brownien géométrique à volatilité constante et que l'on peut trader en continu, un tel portefeuille existe. Il détient $\Delta = \partial V/\partial S$ actions à chaque instant, rééquilibré en continu. Le rendement espéré $\mu$ de l'action n'intervient jamais : quelle que soit la dérive, la couverture l'annule. Seule la volatilité $\sigma$ compte, parce qu'elle gouverne l'ampleur des ajustements de la couverture.
 
@@ -66,7 +66,7 @@ $$
 
 Lecture de la formule : $N(d_2) = \mathbb{Q}(S_T > K)$ est la probabilité risque-neutre d'exercice, donc $K e^{-rT} N(d_2)$ est la valeur actuelle de ce que l'on s'attend à payer. $S\,N(d_1) = e^{-rT}\,\mathbb{E}^{\mathbb{Q}}[S_T \mathbf{1}_{S_T > K}]$ est la valeur actuelle de ce que l'on s'attend à recevoir, et $N(d_1)$ est aussi le delta du call.
 
-Avec un taux de dividende continu $q$, on remplace $S$ par $S e^{-qT}$ partout et $r$ par $r - q$ dans $d_1$. La formule de Black pour les options sur futures est le cas $q = r$.
+Avec un taux de dividende continu $q$, le call vaut $C = S e^{-qT} N(d_1) - K e^{-rT} N(d_2)$ avec $d_1 = \dfrac{\ln(S/K) + (r - q + \tfrac12\sigma^2)T}{\sigma\sqrt{T}}$. On actualise le spot par $e^{-qT}$ **ou** on le fait porter à $r - q$ dans $d_1$ : c'est la même recette écrite deux fois, donc appliquer les deux compte le dividende deux fois. La formule de Black pour les options sur futures est le cas $q = r$.
 
 ## Dérivation
 
@@ -128,7 +128,7 @@ Le second terme vaut $K e^{-rT}\,\mathbb{Q}(Z > -d_2) = K e^{-rT} N(d_2)$. Pour 
 Valorisons un call à un an avec $S = 100$, $K = 105$, $r = 3\,\%$, $\sigma = 20\,\%$.
 
 $$
-d_1 = \frac{\ln(100/105) + (0{,}03 + 0{,}02)\times 1}{0{,}20} = \frac{-0{,}04879 + 0{,}05}{0{,}20} = 0{,}0061, \qquad d_2 = 0{,}0061 - 0{,}20 = -0{,}1939 .
+d_1 = \frac{\ln(100/105) + (0{,}03 + 0{,}02)\times 1}{0{,}20} = \frac{-0{,}04879 + 0{,}05}{0{,}20} = 0{,}0060, \qquad d_2 = 0{,}0060 - 0{,}20 = -0{,}1940 .
 $$
 
 $N(d_1) = 0{,}5024$, $N(d_2) = 0{,}4231$, $K e^{-rT} = 105 \times 0{,}97045 = 101{,}90$, donc

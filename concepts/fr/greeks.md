@@ -14,10 +14,10 @@ related: [value-at-risk]
 Un prix est un seul nombre. Pour gérer une position, il faut savoir comment ce nombre bouge quand le marché bouge, et c'est ce que sont les grecques : les dérivées partielles de la valeur de l'option par rapport à chaque paramètre, autrement dit les coefficients d'un développement de Taylor du prix.
 
 - **Delta** $\Delta$ : à combien d'actions l'option ressemble. Un call de $\Delta = 0{,}56$ gagne environ $0{,}56$ quand l'action gagne $1$. C'est le ratio de couverture : on vend $0{,}56$ action par call et l'on est localement immunisé contre les petits mouvements.
-- **Gamma** $\Gamma$ : la vitesse à laquelle le delta change. C'est la *convexité* de la position. Les options longues ont un gamma positif : elles s'allongent quand l'action monte et se raccourcissent quand elle baisse, ce qui est le sens profitable. Les options courtes doivent cette convexité.
+- **Gamma** $\Gamma$ : la vitesse à laquelle le delta change. C'est la *convexité* de la position. Les options longues ont un gamma positif : leur delta augmente quand l'action monte et diminue quand elle baisse, ce qui est le sens profitable. Les options courtes doivent cette convexité.
 - **Véga** $\nu$ : l'exposition à la volatilité implicite. Les options longues sont longues en véga : plus le marché s'attend à ce que l'action bouge, plus l'option vaut cher.
 - **Thêta** $\Theta$ : l'érosion temporelle. Le loyer que paie chaque jour le détenteur d'une option longue pour la convexité. Il est négatif pour la plupart des positions longues.
-- **Rhô** $\rho$ : la sensibilité aux taux. Généralement la moins importante pour les options courtes sur actions, mais elle compte pour les produits longs et les produits de taux.
+- **Rhô** $\rho$ : la sensibilité aux taux. Généralement la moins importante pour les options actions à courte échéance, mais elle compte pour les produits à longue échéance et les produits de taux.
 
 La relation centrale est celle entre gamma et thêta. Une option longue couverte en delta gagne $\tfrac12\Gamma\,(dS)^2$ de convexité à chaque mouvement et paie $\Theta\,dt$ d'érosion. Dans le modèle de [[black-scholes]], les deux s'équilibrent exactement quand l'action bouge à la volatilité implicite. Elle bouge plus, le gamma gagne ; elle bouge moins, le thêta gagne. C'est tout le métier du trading de volatilité.
 
@@ -49,7 +49,7 @@ Pour le put de mêmes strike et échéance, la parité $P = C - S + Ke^{-rT}$ do
 
 Deux identités à connaître : $\nu = \sigma T S^2\,\Gamma$ (véga et gamma sont proportionnels pour une échéance donnée), et l'EDP de Black–Scholes lue comme une relation entre grecques :
 
-::: formula Arbitrage gamma–thêta
+::: formula Compromis gamma–thêta
 $$
 \Theta + \tfrac12\sigma^2 S^2\,\Gamma + rS\,\Delta - rV = 0
 \qquad\Longrightarrow\qquad
@@ -58,7 +58,7 @@ $$
 :::
 
 ::: formula P&L de la couverture en delta
-Couvrir en continu à la volatilité implicite $\sigma_{\text{impl}}$ alors que l'action bouge en réalité à la volatilité $\sigma_{\text{real}}$ rapporte, sur $dt$,
+Couvrir en continu à la volatilité implicite $\sigma_{\text{impl}}$, en valorisant le livre à cette même $\sigma_{\text{impl}}$ supposée constante, alors que l'action bouge en réalité à la volatilité $\sigma_{\text{real}}$ rapporte, sur $dt$ (ici $\Gamma$ est le gamma Black-Scholes calculé à $\sigma_{\text{impl}}$),
 $$
 d\,\mathrm{P\&L} = \tfrac12\,\Gamma\,S^2\,\big(\sigma_{\text{real}}^2 - \sigma_{\text{impl}}^2\big)\,dt .
 $$
@@ -105,15 +105,15 @@ $$
 d\,\mathrm{P\&L} = \tfrac12\Gamma S^2\big(\sigma_{\text{real}}^2 - \sigma_{\text{impl}}^2\big)\,dt .
 $$
 
-Intégré jusqu'à l'échéance, $\mathrm{P\&L} = \int_0^T \tfrac12\Gamma_t S_t^2\big(\sigma_{\text{real},t}^2 - \sigma_{\text{impl}}^2\big)\,dt$. Le gamma est à l'intérieur de l'intégrale : le P&L dépend du chemin, et la variance réalisée ne compte que là où l'option a du gamma, c'est-à-dire près du strike.
+Intégré jusqu'à l'échéance, et en capitalisant chaque gain quotidien jusqu'à l'échéance au taux sans risque, $\mathrm{P\&L} = \int_0^T e^{r(T-t)}\,\tfrac12\Gamma_t S_t^2\big(\sigma_{\text{real},t}^2 - \sigma_{\text{impl}}^2\big)\,dt$. Le gamma est à l'intérieur de l'intégrale : le P&L dépend du chemin, et la variance réalisée ne compte que là où l'option a du gamma, c'est-à-dire près du strike.
 
 ## Hypothèses et cas limites
 
 - **Dépendance au modèle.** Les formes fermées ci-dessus sont des grecques Black–Scholes et supposent une volatilité constante. Avec un smile, le delta dépend de la façon dont on suppose que la vol implicite bouge avec le spot : « sticky strike » donne $\Delta_{BS}$, « sticky delta » donne $\Delta_{BS} + \nu\,\partial\sigma_{\text{impl}}/\partial S$. Les desks en débattent tous les jours.
 - **Près de l'échéance, à la monnaie.** $\Gamma$ et $\Theta$ explosent comme $1/\sqrt{T}$ : le delta bascule entre 0 et 1 sur de minuscules mouvements (pin risk). Le véga tend vers zéro comme $\sqrt{T}$.
 - **Loin de la monnaie.** $\Gamma$ et $\nu$ s'annulent ; l'option devient soit un forward ($\Delta \to 1$), soit rien ($\Delta \to 0$).
-- **Où sont les maxima.** Gamma et véga sont maximaux près du strike à la monnaie forward ; le gamma culmine légèrement en dessous et le véga légèrement au-dessus, à cause du décalage $\tfrac12\sigma^2 T$ dans $d_1$.
-- **Le thêta peut être positif.** Un put européen très dans la monnaie gagne du thêta (le terme $rKe^{-rT}N(-d_2)$ domine) : on vous doit $K$ et vous vous rapprochez du moment de le recevoir. De même pour un call sur une action à fort taux de dividende.
+- **Où sont les maxima.** En fonction du spot, gamma et véga culminent tous deux près du forward $Ke^{-rT}$, mais pas au même endroit : le gamma en $S = Ke^{-(r + \frac32\sigma^2)T}$, légèrement en dessous, et le véga en $S = Ke^{(\frac12\sigma^2 - r)T}$, légèrement au-dessus. Les deux contiennent le même $\varphi(d_1)$ ; ce qui les sépare, c'est le $1/S$ supplémentaire du gamma face au $S$ supplémentaire du véga.
+- **Le thêta peut être positif.** Un put européen très dans la monnaie gagne du thêta (le terme $rKe^{-rT}N(-d_2)$ domine) : on te doit $K$ et tu te rapproches du moment de le recevoir. De même pour un call sur une action à fort taux de dividende.
 - **Additivité.** Les grecques sont linéaires en la position, donc les grecques d'un livre sont la somme de celles de ses positions. C'est pourquoi le risque s'agrège et se limite par grecque, mais cela ne vaut que par sous-jacent et, pour le véga, par tranche d'échéance.
 - **La formule de P&L n'est que la jambe gamma.** Elle ignore le bruit de couverture discrète, les coûts de transaction et le P&L de véga dû à un changement de volatilité implicite pendant que l'on tient la position.
 
@@ -131,7 +131,7 @@ $$
 - $\Theta = -6{,}98 - 0{,}97 = -7{,}94$ par an, soit $-0{,}0218$ par jour calendaire : les 100 contrats perdent environ $218$ par jour si rien ne bouge.
 - $\rho = 24{,}1$ par unité de $r$, soit $0{,}24$ pour 100 pb.
 
-Le mouvement quotidien d'équilibre découle de l'arbitrage gamma–thêta : avec $\Theta_\gamma = -6{,}98$ la part gamma du thêta, $\tfrac12\Gamma(\delta S)^2 = -\Theta_\gamma\,\delta t$ donne $\delta S = S\sigma\sqrt{\delta t} = 100 \times 0{,}25 \times \sqrt{1/365} = 1{,}31$. Si l'action bouge de plus de $1{,}31$ dans la journée, le gamma long paie le thêta.
+Le mouvement quotidien d'équilibre découle du compromis gamma–thêta : avec $\Theta_\gamma = -6{,}98$ la part gamma du thêta, $\tfrac12\Gamma(\delta S)^2 = -\Theta_\gamma\,\delta t$ donne $\delta S = S\sigma\sqrt{\delta t} = 100 \times 0{,}25 \times \sqrt{1/365} = 1{,}31$. Si l'action bouge de plus de $1{,}31$ dans la journée, le gamma long paie le thêta.
 
 Le script calcule les grecques analytiques, les compare à des différences finies sur le prix et vérifie l'identité de l'EDP :
 
@@ -217,7 +217,7 @@ La couverture en delta ne supprime que l'exposition du premier ordre. Il reste $
 $\nu = 27{,}9$ issu de la formule signifie $27{,}9$ par unité de $\sigma$, c'est-à-dire pour 100 points de volatilité. Par point, c'est $0{,}279$. Utiliser la mauvaise unité surestime le risque véga d'une position d'un facteur 100.
 :::
 
-::: pitfall Compenser des grecques entre sous-jacents ou échéances différents
+::: pitfall Compenser des grecques entre sous-jacents différents ou entre échéances différentes
 Un delta long sur une action ne couvre pas un delta court sur une autre ; un véga long sur des options à 2 ans ne couvre pas un véga court sur des options à 1 mois, parce que les vols implicites des différentes échéances bougent différemment. On n'agrège les grecques qu'à l'intérieur de la tranche où le facteur de risque est commun.
 :::
 

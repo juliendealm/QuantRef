@@ -66,7 +66,7 @@ $$
 $$
 :::
 
-En régime permanent, la valeur filtrée suit $\hat x_t = (1-\bar K)\,\hat x_{t-1} + \bar K\,y_t$ : une **moyenne mobile exponentielle** de facteur $1 - \bar K$ et de demi-vie $\ln 0.5 / \ln(1 - \bar K)$. Le lissage exponentiel est un filtre de Kalman qui a oublié sa condition initiale.
+En régime permanent, la valeur filtrée suit $\hat x_t = (1-\bar K)\,\hat x_{t-1} + \bar K\,y_t$ : une **moyenne mobile exponentielle** de facteur $1 - \bar K$ et de demi-vie $\ln 0{,}5 / \ln(1 - \bar K)$. Le lissage exponentiel est un filtre de Kalman qui a oublié sa condition initiale.
 
 **Le gain comme poids de confiance.** $\mathbf{K}_t = \operatorname{Cov}(\mathbf{x}_t, \boldsymbol\nu_t)\operatorname{Var}(\boldsymbol\nu_t)^{-1}$ est le coefficient de régression de l'état sur l'innovation — le même $\operatorname{Cov}/\operatorname{Var}$ qu'une pente MCO en [[linear-regression|régression linéaire]]. Dans le cas scalaire, $r \to 0$ donne $K \to 1$ (l'observation est exacte, fais-lui entièrement confiance) et $P_{t|t-1} \to 0$ donne $K \to 0$ (la prédiction est exacte, ignore l'observation). Tout ce qui est entre les deux est un compromis pondéré par les précisions.
 
@@ -97,7 +97,7 @@ qui est la moyenne empirique courante — l'estimation MCO d'une constante, calc
 ## Hypothèses et cas limites
 
 - **Linéarité et gaussianité.** Une dynamique ou une observation non linéaire (un prix d'option fonction d'une volatilité latente) exige le filtre de Kalman étendu (linéariser) ou le filtre unscented (points sigma) ; un bruit à queues lourdes (sauts, mauvais ticks) exige un filtre particulaire ou au moins des innovations robustifiées, parce qu'une seule valeur aberrante déplace beaucoup un filtre gaussien.
-- **Seul le rapport $\mathbf{Q}/\mathbf{R}$ compte pour l'estimation.** Multiplier les deux par la même constante laisse $\mathbf{K}_t$ inchangé et ne fait que remettre $\mathbf{P}$ à l'échelle. Fixer ce rapport est tout l'art : trop de $q$ et le filtre court après le bruit, trop peu et il traîne derrière un état qui bouge. Estime-le par maximum de vraisemblance sur les innovations ou par erreur de prévision hors échantillon, pas à l'œil.
+- **Seul le rapport $\mathbf{Q}/\mathbf{R}$ compte pour l'estimation.** Multiplier $\mathbf{Q}$, $\mathbf{R}$ et $\mathbf{P}_0$ par la même constante laisse $\mathbf{K}_t$ inchangé et ne fait que remettre $\mathbf{P}$ à l'échelle ; ne multiplier que $\mathbf{Q}$ et $\mathbf{R}$ laisse le gain en régime permanent inchangé, mais pas le transitoire initial. Fixer ce rapport est tout l'art : trop de $q$ et le filtre court après le bruit, trop peu et il traîne derrière un état qui bouge. Estime-le par maximum de vraisemblance sur les innovations ou par erreur de prévision hors échantillon, pas à l'œil.
 - **Filtrage contre lissage.** $\hat{\mathbf{x}}_{t|t}$ n'utilise que les données jusqu'à $t$, donc il est utilisable en temps réel et sans anticipation. Le lisseur de Rauch–Tung–Striebel $\hat{\mathbf{x}}_{t|T}$ utilise tout l'échantillon : meilleur pour l'analyse historique, inutilisable pour trader.
 - **Initialisation.** Avec un a priori diffus ($\mathbf{P}_0$ énorme), les premiers pas sont dominés par les données ; de toute façon le filtre oublie $\hat{\mathbf{x}}_0$ au rythme $1 - \bar K$ par pas, donc la condition initiale compte rarement après un rodage de quelques demi-vies.
 - **Numérique.** $(\mathbf{I} - \mathbf{K}\mathbf{H})\mathbf{P}$ peut perdre sa symétrie ou son caractère défini positif en virgule flottante ; la forme de Joseph $(\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}(\mathbf{I}-\mathbf{K}\mathbf{H})^\top + \mathbf{K}\mathbf{R}\mathbf{K}^\top$ ou un filtre en racine carrée sont plus sûrs pour des états multidimensionnels.
@@ -146,7 +146,7 @@ equivalent EWMA half-life: 6.9 observations
 ```
 :::
 
-Le filtre divise l'erreur par 3,5. Avec $\lambda = q/r = 0.01$, le gain en régime permanent vaut $0.095$ : chaque nouvelle cotation déplace l'estimation de 9,5 % de la surprise, et le filtre est exactement une moyenne mobile exponentielle de demi-vie 7 observations. Le gain empirique a atteint la valeur analytique bien avant le pas 500. Pour sentir le compromis, change $q$ : à $q = r$ le gain vaut $0.62$ et le filtre suit les cotations presque une pour une ; à $q = 10^{-4}\,r$ le gain tombe à $0.01$ (demi-vie d'environ 70 cotations) et le filtre traîne derrière tout mouvement réel du prix juste.
+Le filtre divise l'erreur par 3,5. Avec $\lambda = q/r = 0{,}01$, le gain en régime permanent vaut $0{,}095$ : chaque nouvelle cotation déplace l'estimation de 9,5 % de la surprise, et le filtre est exactement une moyenne mobile exponentielle de demi-vie 7 observations. Le gain empirique a atteint la valeur analytique bien avant le pas 500. Pour sentir le compromis, change $q$ : à $q = r$ le gain vaut $0{,}62$ et le filtre suit les cotations presque une pour une ; à $q = 10^{-4}\,r$ le gain tombe à $0{,}01$ (demi-vie d'environ 70 cotations) et le filtre traîne derrière tout mouvement réel du prix juste.
 
 ## Pourquoi c'est important en finance quantitative
 
@@ -171,7 +171,7 @@ Avec des matrices de système constantes, $\mathbf{P}_t$ et $\mathbf{K}_t$ sont 
 :::
 
 ::: pitfall Prendre l'estimation filtrée pour la vérité
-$\hat{\mathbf{x}}_{t|t}$ vient avec $\mathbf{P}_{t|t}$. Un ratio de couverture de $0.8 \pm 0.3$ est une proposition de trading très différente de $0.8 \pm 0.02$.
+$\hat{\mathbf{x}}_{t|t}$ vient avec $\mathbf{P}_{t|t}$. Un ratio de couverture de $0{,}8 \pm 0{,}3$ est une proposition de trading très différente de $0{,}8 \pm 0{,}02$.
 :::
 
 ## Révision en 30 secondes
@@ -214,7 +214,7 @@ Partons de $P_0 \to \infty$ ; après une observation, $K_1 = 1$, $\hat x_1 = y_1
 Résous $(P^-)^2 - qP^- - qr = 0$ avec $q = r$, puis $\bar K = \bar P^-/(\bar P^- + r)$.
 :::
 ::: answer
-Avec $q = r$ : $\bar P^{-} = r\,(1 + \sqrt5)/2$, donc $\bar K = \frac{(1+\sqrt5)/2}{(1+\sqrt5)/2 + 1} = \frac{1 + \sqrt5}{3 + \sqrt5} = \frac{\sqrt5 - 1}{2} \approx 0{,}618$, le conjugué du nombre d'or. Le filtre est une moyenne mobile exponentielle $\hat x_t = 0.382\,\hat x_{t-1} + 0.618\,y_t$ de demi-vie inférieure à une observation : quand l'état bouge autant que le bruit, il y a peu à gagner à moyenner et le filtre suit essentiellement les données. La règle générale est que le gain ne dépend que de $\lambda = q/r$, et il faut $\lambda \approx 0.01$ pour obtenir une demi-vie de 7 observations.
+Avec $q = r$ : $\bar P^{-} = r\,(1 + \sqrt5)/2$, donc $\bar K = \frac{(1+\sqrt5)/2}{(1+\sqrt5)/2 + 1} = \frac{1 + \sqrt5}{3 + \sqrt5} = \frac{\sqrt5 - 1}{2} \approx 0{,}618$, le conjugué du nombre d'or. Le filtre est une moyenne mobile exponentielle $\hat x_t = 0{,}382\,\hat x_{t-1} + 0{,}618\,y_t$ de demi-vie inférieure à une observation : quand l'état bouge autant que le bruit, il y a peu à gagner à moyenner et le filtre suit essentiellement les données. La règle générale est que le gain ne dépend que de $\lambda = q/r$, et il faut $\lambda \approx 0{,}01$ pour obtenir une demi-vie de 7 observations.
 :::
 :::
 

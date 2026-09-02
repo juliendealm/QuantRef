@@ -67,7 +67,7 @@ $$
 $$
 \mathbb{E}[Z \mid Z > z_\alpha] = \frac{1}{1-\alpha}\int_{z_\alpha}^{\infty} z\varphi(z)\,dz = \frac{1}{1-\alpha}\Big[-\varphi(z)\Big]_{z_\alpha}^{\infty} = \frac{\varphi(z_\alpha)}{1-\alpha},
 $$
-and $\mathrm{ES}_\alpha = \mu + \sigma\,\mathbb{E}[Z \mid Z > z_\alpha]$. The ratio $\mathrm{ES}/\mathrm{VaR}$ is $1.15$ at 99 % for a normal and tends to 1 as $\alpha \to 1$: the normal tail is thin, so the average beyond the quantile is barely above the quantile.
+and $\mathrm{ES}_\alpha = \mu + \sigma\,\mathbb{E}[Z \mid Z > z_\alpha]$. For $\mu = 0$ the ratio $\mathrm{ES}/\mathrm{VaR}$ is $\varphi(z_\alpha)/((1-\alpha)z_\alpha) = 1.15$ at 99 % for a normal and tends to 1 as $\alpha \to 1$: the normal tail is thin, so the average beyond the quantile is barely above the quantile.
 
 **Square root of time.** If daily returns $r_1, \dots, r_h$ are i.i.d. $\mathcal{N}(0, \sigma^2)$, the $h$-day return is $\mathcal{N}(0, h\sigma^2)$, so its quantile is $\sqrt{h}$ times the daily quantile — the same linear growth of variance as in a [[brownian-motion]]. Both ingredients matter: independence gives the variance $h\sigma^2$, and normality guarantees that the $h$-day distribution has the same *shape* as the daily one, so the quantile scales with the standard deviation. With a drift $\mu \ne 0$ the correct expression is $-\mu h + \sigma\sqrt{h}\,z_\alpha$; the drift is negligible at 1–10 days and dominant at one year.
 

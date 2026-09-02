@@ -81,12 +81,12 @@ qui se réduit à $\sigma^2(\mathbf{X}^\top\mathbf{X})^{-1}$ quand $\operatornam
 - **Régresseurs non stationnaires.** Régresser une marche aléatoire sur une marche aléatoire indépendante donne une statistique $t$ « significative » la plupart du temps et un $R^2$ qui ne tend pas vers zéro quand $n \to \infty$ (Granger et Newbold, 1974). Les prix sont proches de marches aléatoires ; les rendements non. Régresse des rendements sur des rendements, ou teste la cointégration quand tu as vraiment besoin des niveaux.
 - **Hétéroscédasticité et autocorrélation** ne biaisent pas $\hat{\boldsymbol\beta}$ mais rendent fausses les erreurs-types classiques — avec du clustering de volatilité, en général trop petites. Les rendements chevauchants (rendements à 12 mois échantillonnés chaque mois) sont autocorrélés *par construction* ; utilise Newey–West avec au moins autant de retards que le chevauchement.
 - **La multicolinéarité** gonfle les erreurs-types sans rien biaiser : les coefficients individuels deviennent instables en signe alors que l'ajustement global reste bon. La régression ridge échange un peu de biais contre beaucoup de variance.
-- **Les valeurs extrêmes** ont un levier proportionnel à $(x_i - \bar x)^2$ : un seul jour de krach peut fixer le bêta à lui seul. Winsorise, ou au moins regarde le levier.
+- **Les valeurs extrêmes** ont un levier $h_{ii} = 1/n + (x_i - \bar x)^2 / \sum_j (x_j - \bar x)^2$, croissant avec le carré de l'écart à la moyenne : un seul jour de krach peut fixer le bêta à lui seul. Winsorise, ou au moins regarde le levier.
 - **Le sens de la régression n'est pas symétrique.** Régresser $y$ sur $x$ donne la pente $\rho\,\sigma_y/\sigma_x$ ; régresser $x$ sur $y$ donne $\rho\,\sigma_x/\sigma_y$, dont l'inverse $\sigma_y/(\rho\,\sigma_x)$ est une droite différente sauf si $\lvert\rho\rvert = 1$. Pour un ratio de couverture, décide quelle jambe est couverte, ou utilise les moindres carrés totaux.
 
 ## Exemple détaillé
 
-On estime le bêta de marché d'une action sur un an de rendements quotidiens avec rien d'autre que les équations normales, puis on vérifie avec `np.polyfit`. Les données sont simulées avec un vrai $\beta = 1.3$ et un vrai alpha quotidien de $0.0002$.
+On estime le bêta de marché d'une action sur un an de rendements quotidiens avec rien d'autre que les équations normales, puis on vérifie avec `np.polyfit`. Les données sont simulées avec un vrai $\beta = 1{,}3$ et un vrai alpha quotidien de $0{,}0002$.
 
 ```python
 import numpy as np
@@ -126,7 +126,7 @@ np.polyfit:    beta = 1.3292, alpha = +0.00172
 ```
 :::
 
-Trois leçons en cinq lignes. Le bêta ressort à $1.33 \pm 0.09$, ce qui couvre confortablement le vrai $1.3$. L'estimation d'alpha de 17 points de base par jour a l'air impressionnante (plus de 40 % annualisés), pourtant sa statistique $t$ vaut 1,83 : non significative à 5 %, et la vraie valeur $0.0002$ se trouve bien à l'intérieur de deux erreurs-types — c'est ce que « l'alpha est difficile à mesurer » signifie numériquement : un an de données quotidiennes ne distingue pas un alpha annuel de 5 % de zéro. Le $R^2$ de 0,455 est typique d'une action seule contre le marché ; l'autre moitié de la variance est idiosyncratique, et un $R^2$ modeste n'est pas le signe d'une mauvaise régression.
+Trois leçons en cinq lignes. Le bêta ressort à $1{,}33 \pm 0{,}09$, ce qui couvre confortablement le vrai $1{,}3$. L'estimation d'alpha de 17 points de base par jour a l'air impressionnante (plus de 40 % annualisés), pourtant sa statistique $t$ vaut 1,83 : non significative à 5 %, et la vraie valeur $0{,}0002$ se trouve bien à l'intérieur de deux erreurs-types — c'est ce que « l'alpha est difficile à mesurer » signifie numériquement : un an de données quotidiennes ne distingue pas un alpha annuel de 5 % de zéro. Le $R^2$ de 0,455 est typique d'une action seule contre le marché ; l'autre moitié de la variance est idiosyncratique, et un $R^2$ modeste n'est pas le signe d'une mauvaise régression.
 
 ## Pourquoi c'est important en finance quantitative
 
@@ -144,7 +144,7 @@ Deux marches aléatoires sans lien donnent un $R^2$ élevé et une statistique $
 :::
 
 ::: pitfall Courir après le $R^2$
-Ajouter un régresseur ne fait jamais baisser le $R^2$, donc la statistique récompense le surajustement. Une régression sur rendements quotidiens avec $R^2 = 0.02$ peut être un signal rentable ; une régression sur prix avec $R^2 = 0.98$ peut être du pur bruit. Utilise $\bar R^2$, les critères d'information et, surtout, l'ajustement hors échantillon.
+Ajouter un régresseur ne fait jamais baisser le $R^2$, donc la statistique récompense le surajustement. Une régression sur rendements quotidiens avec $R^2 = 0{,}02$ peut être un signal rentable ; une régression sur prix avec $R^2 = 0{,}98$ peut être du pur bruit. Utilise $\bar R^2$, les critères d'information et, surtout, l'ajustement hors échantillon.
 :::
 
 ::: pitfall Erreurs-types classiques sur des données financières
@@ -152,7 +152,7 @@ Le clustering de volatilité (hétéroscédasticité) et les observations chevau
 :::
 
 ::: pitfall Confondre significativité et taille
-Une statistique $t$ de 5 sur un coefficient de 0,001 dit que l'effet est estimé précisément, pas qu'il est assez grand pour être tradé après coûts. Inversement, un alpha avec $t = 1.8$ peut être économiquement énorme et rester non mesurable.
+Une statistique $t$ de 5 sur un coefficient de 0,001 dit que l'effet est estimé précisément, pas qu'il est assez grand pour être tradé après coûts. Inversement, un alpha avec $t = 1{,}8$ peut être économiquement énorme et rester non mesurable.
 :::
 
 ## Révision en 30 secondes
@@ -182,16 +182,16 @@ La première équation normale est $\mathbf{1}^\top(\mathbf{y} - \hat\alpha\math
 :::
 :::
 
-::: question Une régression de bêta sur 250 rendements quotidiens donne $\hat\beta = 1.2$ avec une erreur-type de 0,15. Le bêta est-il significativement différent de 1 ? Combien d'observations faudrait-il pour ramener l'erreur-type à 0,05 ?
+::: question Une régression de bêta sur 250 rendements quotidiens donne $\hat\beta = 1{,}2$ avec une erreur-type de 0,15. Le bêta est-il significativement différent de 1 ? Combien d'observations faudrait-il pour ramener l'erreur-type à 0,05 ?
 ::: hint
 La statistique de test est $(\hat\beta - 1)/\operatorname{se}$ ; l'erreur-type décroît comme $1/\sqrt{n}$.
 :::
 ::: answer
-$t = (1.2 - 1)/0.15 = 1.33$, bien en dessous de la valeur critique $1.97$ ($t_{248}$ à 5 %) : pas significativement différent de 1. L'intervalle à 95 % est $1.2 \pm 1.97 \times 0.15 = [0.90, 1.50]$. Diviser l'erreur-type par 3 exige 9 fois plus de données, soit environ 2 250 jours ou 9 ans — et d'ici là le bêta aura changé. C'est pourquoi les bêtas sont rétrécis vers 1 (ajustement de Vasicek/Bloomberg) ou filtrés plutôt qu'estimés sur une fenêtre courte.
+$t = (1{,}2 - 1)/0{,}15 = 1{,}33$, bien en dessous de la valeur critique $1{,}97$ ($t_{248}$ à 5 %) : pas significativement différent de 1. L'intervalle à 95 % est $1{,}2 \pm 1{,}97 \times 0{,}15 = [0{,}90, 1{,}50]$. Diviser l'erreur-type par 3 exige 9 fois plus de données, soit environ 2 250 jours ou 9 ans — et d'ici là le bêta aura changé. C'est pourquoi les bêtas sont rétrécis vers 1 (ajustement de Vasicek/Bloomberg) ou filtrés plutôt qu'estimés sur une fenêtre courte.
 :::
 :::
 
-::: question Tu régresses le prix de l'action A sur le prix de l'action B et tu obtiens $R^2 = 0.95$ avec $t = 40$ sur la pente. Un collègue en conclut que la paire est une excellente couverture. Que lui réponds-tu ?
+::: question Tu régresses le prix de l'action A sur le prix de l'action B et tu obtiens $R^2 = 0{,}95$ avec $t = 40$ sur la pente. Un collègue en conclut que la paire est une excellente couverture. Que lui réponds-tu ?
 ::: hint
 Quel est le comportement temporel des prix, et à quoi ressemble le résidu si les deux n'ont aucun lien ?
 :::
@@ -205,6 +205,6 @@ Les prix sont proches de marches aléatoires, donc il s'agit très probablement 
 Test bilatéral à 5 % sous l'hypothèse nulle ; Bonferroni ; et réfléchis à ce que mesure $R^2$ quand les coefficients ont été choisis sur les mêmes données.
 :::
 ::: answer
-Sous l'hypothèse nulle d'absence de prévisibilité, chaque signal passe avec probabilité 5 %, donc 10 sur 200 sont attendus par hasard ; 12 n'a rien de remarquable. Une correction de Bonferroni teste chacun à $0.05/200 = 0.00025$, soit $\lvert t\rvert > 3.7$ ; le seuil recommandé par Harvey, Liu et Zhu pour un nouveau facteur est $t > 3$ ; et une procédure de contrôle du taux de fausses découvertes est le compromis moderne. Même pour un signal authentique, le $R^2$ dans l'échantillon est biaisé vers le haut parce que les coefficients ont été optimisés sur les mêmes données : avec $k$ régresseurs et aucune relation réelle, $\mathbb{E}[R^2] \approx k/(n-1)$, et tout $R^2$ ajusté contient cette composante « ajustement au bruit ». Le $R^2$ hors échantillon peut être négatif pour un signal qui avait l'air correct dans l'échantillon ; c'est ce chiffre-là qu'il faut reporter.
+Sous l'hypothèse nulle d'absence de prévisibilité, chaque signal passe avec probabilité 5 %, donc 10 sur 200 sont attendus par hasard ; 12 n'a rien de remarquable. Une correction de Bonferroni teste chacun à $0{,}05/200 = 0{,}00025$, soit $\lvert t\rvert > 3{,}7$ ; le seuil recommandé par Harvey, Liu et Zhu pour un nouveau facteur est $t > 3$ ; et une procédure de contrôle du taux de fausses découvertes est le compromis moderne. Même pour un signal authentique, le $R^2$ dans l'échantillon est biaisé vers le haut parce que les coefficients ont été optimisés sur les mêmes données : avec $k$ colonnes dans $\mathbf{X}$ (constante incluse) et aucune relation réelle, $\mathbb{E}[R^2] = (k-1)/(n-1)$, et tout $R^2$ ajusté contient cette composante « ajustement au bruit ». Le $R^2$ hors échantillon peut être négatif pour un signal qui avait l'air correct dans l'échantillon ; c'est ce chiffre-là qu'il faut reporter.
 :::
 :::

@@ -57,7 +57,7 @@ Let $M$ be a martingale and $\tau$ a stopping time, i.e. $\{\tau \le n\} \in \ma
 The stopped process $M_{n \wedge \tau}$ is *always* a martingale; what can fail without one of these conditions is the passage to the limit $n \to \infty$. Same statement in continuous time with right-continuous paths.
 
 ::: formula Fundamental theorem of asset pricing
-A market with numéraire $B_t$ (e.g. $B_t = e^{rt}$) is arbitrage-free if and only if there exists a measure $\mathbb{Q}$ equivalent to $\mathbb{P}$ under which every discounted traded price $S_t / B_t$ is a $\mathbb{Q}$-martingale. Then for any attainable payoff $H$ paid at $T$,
+In discrete time with finitely many dates, a market with numéraire $B_t$ (e.g. $B_t = e^{rt}$) is arbitrage-free if and only if there exists a measure $\mathbb{Q}$ equivalent to $\mathbb{P}$ under which every discounted traded price $S_t / B_t$ is a $\mathbb{Q}$-martingale. (In continuous time the clean statement replaces "no arbitrage" by NFLVR and "martingale" by sigma-martingale.) Then for any attainable payoff $H$ paid at $T$,
 $$
 V_t = B_t\, \mathbb{E}^{\mathbb{Q}}\!\left[\frac{H}{B_T} \,\middle|\, \mathcal{F}_t\right].
 $$
@@ -68,7 +68,7 @@ The market is complete (every payoff replicable) if and only if $\mathbb{Q}$ is 
 
 **$W_t^2 - t$ is a martingale.** For $s \le t$ write $W_t = W_s + (W_t - W_s)$; the increment is independent of $\mathcal{F}_s$ with mean $0$ and variance $t - s$:
 $$
-\mathbb{E}[W_t^2 \mid \mathcal{F}_s] = W_s^2 + 2W_s\,\mathbb{E}[W_t - W_s] + \mathbb{E}[(W_t - W_s)^2] = W_s^2 + (t - s),
+\mathbb{E}[W_t^2 \mid \mathcal{F}_s] = W_s^2 + 2W_s\,\mathbb{E}[W_t - W_s \mid \mathcal{F}_s] + \mathbb{E}[(W_t - W_s)^2 \mid \mathcal{F}_s] = W_s^2 + (t - s),
 $$
 so $\mathbb{E}[W_t^2 - t \mid \mathcal{F}_s] = W_s^2 - s$. The same computation with $\mathbb{E}[\xi^2] = 1$ gives $S_n^2 - n$.
 
@@ -90,7 +90,7 @@ so the stopped process is a martingale transform with $H_k = \mathbf{1}_{\{\tau 
 ## Assumptions & Edge Cases
 
 - **Integrability is part of the definition.** A random walk with Cauchy steps is symmetric but has no mean, so it is not a martingale.
-- **Martingale with respect to what?** The property depends on the filtration *and* the measure. Under $\mathbb{P}$ the discounted stock is a submartingale when $\mu > r$; under $\mathbb{Q}$ it is a martingale; the undiscounted $S_t$ is a $\mathbb{Q}$-submartingale with drift $r$. Enlarging the filtration (an insider with $\mathcal{G}_t \supsetneq \mathcal{F}_t$) can destroy the property.
+- **Martingale with respect to what?** The property depends on the filtration *and* the measure. Under $\mathbb{P}$ the discounted stock is a submartingale when $\mu > r$; under $\mathbb{Q}$ it is a martingale; the undiscounted $S_t$ has $\mathbb{Q}$-drift $r$, so it is a $\mathbb{Q}$-submartingale when $r \ge 0$. Enlarging the filtration (an insider with $\mathcal{G}_t \supsetneq \mathcal{F}_t$) can destroy the property.
 - **Martingale is not "independent increments", nor "Markov".** $\int_0^t H_s\,dW_s$ with adapted $H$ is a martingale with dependent increments; a Markov process with drift is not a martingale.
 - **Optional stopping fails without its conditions.** The doubling strategy has unbounded stakes and a stopped wealth unbounded below; the first hitting time $\tau_1$ of $+1$ by the symmetric random walk is finite a.s. but $\mathbb{E}[S_{\tau_1}] = 1 \ne 0$, because $\mathbb{E}[\tau_1] = \infty$.
 - **Local martingales.** Stochastic integrals are in general only *local* martingales (martingales up to a sequence of stopping times). A strict local martingale can have decreasing expectation, the mathematical model of a price bubble. $\exp(\sigma W_t - \sigma^2 t/2)$ is a true martingale for constant $\sigma$ (Novikov's criterion), which is what makes Girsanov's change of measure legitimate in [[black-scholes]].
@@ -99,13 +99,13 @@ so the stopped process is a martingale transform with $H_k = \mathbf{1}_{\{\tau 
 
 ## Worked Example
 
-The doubling ("martingale") betting strategy. Flip a fair coin, bet 1, double the stake after each loss, stop at the first win. If the first win comes at round $\tau$, you have lost $1 + 2 + \cdots + 2^{\tau - 2} = 2^{\tau - 1} - 1$ and win $2^{\tau - 1}$: net $+1$. Since $\mathbb{P}(\tau = k) = 2^{-k}$, $\tau < \infty$ a.s. and $\mathbb{E}[\tau] = 2$. So the stopped wealth is $W_\tau = 1$ almost surely while $W_0 = 0$: "a sure profit from a fair game".
+The doubling ("martingale") betting strategy. Flip a fair coin, bet 1, double the stake after each loss, stop at the first win. If the first win comes at round $\tau$, you have lost $1 + 2 + \cdots + 2^{\tau - 2} = 2^{\tau - 1} - 1$ and win $2^{\tau - 1}$: net $+1$. Since $\mathbb{P}(\tau = k) = 2^{-k}$, $\tau < \infty$ a.s. and $\mathbb{E}[\tau] = 2$. So the stopped wealth is $V_\tau = 1$ almost surely while $V_0 = 0$: "a sure profit from a fair game".
 
-The wealth $W_n = \sum_{k \le n} H_k \xi_k$ with $H_k = 2^{k-1}\mathbf{1}_{\{\tau \ge k\}}$ *is* a martingale (predictable stakes), so the catch is in optional stopping: $\mathbb{E}[\tau] = 2 < \infty$ but the increments $2^{k-1}$ are unbounded (condition 3 fails), and $W_{n \wedge \tau}$ is unbounded below (condition 2 fails). The mathematics is fine; the strategy needs unbounded credit.
+The wealth $V_n = \sum_{k \le n} H_k \xi_k$ with $H_k = 2^{k-1}\mathbf{1}_{\{\tau \ge k\}}$ *is* a martingale (predictable stakes), so the catch is in optional stopping: $\mathbb{E}[\tau] = 2 < \infty$ but the increments $2^{k-1}$ are unbounded (condition 3 fails), and $V_{n \wedge \tau}$ is unbounded below (condition 2 fails). The mathematics is fine; the strategy needs unbounded credit.
 
-Impose a bounded horizon $N$, equivalently a credit line of $2^N - 1$. Then condition 1 holds and $\mathbb{E}[W_{\tau \wedge N}] = 0$. Directly:
+Impose a bounded horizon $N$, equivalently a credit line of $2^N - 1$. Then condition 1 holds and $\mathbb{E}[V_{\tau \wedge N}] = 0$. Directly:
 $$
-\mathbb{E}[W_{\tau \wedge N}] = (1 - 2^{-N}) \cdot 1 + 2^{-N} \cdot \big(-(2^N - 1)\big) = 1 - 2^{-N} - 1 + 2^{-N} = 0.
+\mathbb{E}[V_{\tau \wedge N}] = (1 - 2^{-N}) \cdot 1 + 2^{-N} \cdot \big(-(2^N - 1)\big) = 1 - 2^{-N} - 1 + 2^{-N} = 0.
 $$
 With $N = 10$: win $1$ with probability $0.999$, lose $1\,023$ with probability $0.001$. Mean zero, median $+1$, and a fat left tail, the exact signature of a short-volatility strategy.
 
@@ -155,9 +155,9 @@ The mean wealth stays at zero at every intermediate time (the stopped process is
 ## Why It Matters in Quant Finance
 
 - **Risk-neutral pricing.** [[black-scholes]] is the fundamental theorem with $\tilde{S}_t = S_0\exp(\sigma W^{\mathbb{Q}}_t - \sigma^2 t/2)$, the exponential martingale. Every derivative price is $B_t\,\mathbb{E}^{\mathbb{Q}}[H/B_T \mid \mathcal{F}_t]$, and the delta-hedged portfolio is the replicating martingale transform.
-- **Efficient markets.** Samuelson's "properly anticipated prices fluctuate randomly": under the pricing measure discounted prices are martingales; under $\mathbb{P}$ the deviation from a martingale is the risk premium. Return-predictability tests are tests of the martingale-difference property $\mathbb{E}[r_{t+1} \mid \mathcal{F}_t] = \text{const}$.
+- **Efficient markets.** Samuelson's "properly anticipated prices fluctuate randomly": under the pricing measure discounted prices are martingales; under $\mathbb{P}$ the deviation from a martingale is the risk premium. Return-predictability tests ask whether $\mathbb{E}[r_{t+1} \mid \mathcal{F}_t]$ is constant, i.e. whether returns are a martingale plus a constant drift.
 - **Trading strategies are martingale transforms.** P&L $= \sum_k H_k\,\Delta S_k$ with $H$ predictable. If $\Delta S$ is a martingale difference, no bounded predictable $H$ has positive expected P&L: there is no timing edge without information that is not in $\mathcal{F}_t$.
-- **[[brownian-motion|Brownian motion]]** is the canonical continuous martingale, and Lévy's characterisation says that any continuous martingale with quadratic variation $t$ *is* a Brownian motion. Stochastic integrals are local martingales, and [[ito-lemma|Itô's formula]] is the tool for finding the compensator that turns $f(W_t)$ into one.
+- **[[brownian-motion|Brownian motion]]** is the canonical continuous martingale, and Lévy's characterisation says that any continuous local martingale $M$ with $M_0 = 0$ and quadratic variation $[M]_t = t$ *is* a Brownian motion. Stochastic integrals are local martingales, and [[ito-lemma|Itô's formula]] is the tool for finding the compensator that turns $f(W_t)$ into one.
 - **Filtering.** The innovations $y_t - \mathbb{E}[y_t \mid \mathcal{F}_{t-1}]$ of a [[kalman-filter|Kalman filter]] form a martingale difference sequence, and the filtered estimate of a fixed quantity is a Doob martingale.
 - **Drawdown bounds.** Doob's maximal inequality, $\mathbb{P}(\max_{s \le t} M_s \ge \lambda) \le \mathbb{E}[M_t^+]/\lambda$, bounds the probability that a fair game ever reaches a level, hence the probability of hitting a stop-loss before $t$.
 
