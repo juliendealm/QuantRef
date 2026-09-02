@@ -1,0 +1,228 @@
+---
+title: Filtre de Kalman
+subject: filtering
+summary: L'estimateur récursif optimal d'un état caché linéaire-gaussien à partir d'observations bruitées. Chaque pas mélange une prédiction du modèle et une nouvelle mesure, pondérées par un gain qui dit à laquelle se fier ; c'est une mise à jour bayésienne avec des gaussiennes, et des moindres carrés qui oublient.
+difficulty: 4
+interview: 3
+tags: [filtering, kalman, state-space, bayesian, time-series, hedge-ratio]
+prerequisites: [bayes-theorem, linear-regression]
+related: [martingales]
+---
+
+## Intuition
+
+Tu veux connaître une quantité que tu ne peux pas observer directement — un prix juste, un ratio de couverture, un bêta — mais tu en reçois une lecture bruitée à chaque tick. Deux sources d'information sont en concurrence : ce que ton **modèle** dit que la quantité devrait valoir maintenant, sachant où elle était un instant plus tôt, et ce que dit la **nouvelle observation**. Le filtre de Kalman prend une moyenne pondérée des deux, et le poids — le gain de Kalman — est fixé par la source actuellement la moins incertaine.
+
+Si le modèle est précis et les mesures bruitées, le gain est petit : tu bouges à peine à chaque nouvelle lecture. Si le modèle est vague et les mesures propres, le gain est proche de 1 : tu sautes sur la donnée. Le filtre suit non seulement l'estimation mais aussi son incertitude, donc le gain s'adapte tout seul. Après de nombreuses observations d'une quantité stable, l'incertitude se réduit et le filtre devient difficile à faire bouger ; quand l'état caché a le droit de se promener, l'incertitude croît entre les observations et le filtre reste réactif.
+
+En une phrase : un filtre de Kalman, c'est la [[bayes-theorem|règle de Bayes]] appliquée encore et encore avec des distributions gaussiennes, où l'a priori d'aujourd'hui est l'a posteriori d'hier poussé à travers la dynamique.
+
+## Formulation mathématique
+
+**Modèle espace-état.** Un état caché $\mathbf{x}_t \in \mathbb{R}^m$ et des observations $\mathbf{y}_t \in \mathbb{R}^p$ :
+
+::: formula Modèle espace-état linéaire-gaussien
+$$
+\begin{aligned}
+\mathbf{x}_t &= \mathbf{F}\,\mathbf{x}_{t-1} + \mathbf{w}_t, & \mathbf{w}_t &\sim \mathcal{N}(\mathbf{0}, \mathbf{Q}) \quad \text{(transition)}\\
+\mathbf{y}_t &= \mathbf{H}\,\mathbf{x}_t + \mathbf{v}_t, & \mathbf{v}_t &\sim \mathcal{N}(\mathbf{0}, \mathbf{R}) \quad \text{(observation)}
+\end{aligned}
+$$
+avec $\mathbf{w}_t$ et $\mathbf{v}_t$ des bruits blancs indépendants et $\mathbf{x}_0 \sim \mathcal{N}(\hat{\mathbf{x}}_0, \mathbf{P}_0)$.
+:::
+
+On note $\hat{\mathbf{x}}_{t|s} = \mathbb{E}[\mathbf{x}_t \mid \mathbf{y}_{1:s}]$ et $\mathbf{P}_{t|s}$ la covariance de l'erreur $\mathbf{x}_t - \hat{\mathbf{x}}_{t|s}$.
+
+::: formula Prédiction
+$$
+\hat{\mathbf{x}}_{t|t-1} = \mathbf{F}\,\hat{\mathbf{x}}_{t-1|t-1}, \qquad
+\mathbf{P}_{t|t-1} = \mathbf{F}\,\mathbf{P}_{t-1|t-1}\,\mathbf{F}^\top + \mathbf{Q}.
+$$
+:::
+
+::: formula Mise à jour avec le gain de Kalman
+$$
+\begin{aligned}
+\boldsymbol\nu_t &= \mathbf{y}_t - \mathbf{H}\,\hat{\mathbf{x}}_{t|t-1} & &\text{innovation}\\
+\mathbf{S}_t &= \mathbf{H}\,\mathbf{P}_{t|t-1}\,\mathbf{H}^\top + \mathbf{R} & &\text{covariance de l'innovation}\\
+\mathbf{K}_t &= \mathbf{P}_{t|t-1}\,\mathbf{H}^\top\,\mathbf{S}_t^{-1} & &\text{gain de Kalman}\\
+\hat{\mathbf{x}}_{t|t} &= \hat{\mathbf{x}}_{t|t-1} + \mathbf{K}_t\,\boldsymbol\nu_t\\
+\mathbf{P}_{t|t} &= (\mathbf{I} - \mathbf{K}_t\mathbf{H})\,\mathbf{P}_{t|t-1}
+\end{aligned}
+$$
+:::
+
+**Modèle scalaire de niveau local**, le cheval de bataille : $x_t = x_{t-1} + w_t$ et $y_t = x_t + v_t$, avec $\operatorname{Var}(w_t) = q$ et $\operatorname{Var}(v_t) = r$. Alors
+
+::: formula Niveau local : gain et régime permanent
+$$
+K_t = \frac{P_{t|t-1}}{P_{t|t-1} + r}, \qquad
+\hat x_{t|t} = (1 - K_t)\,\hat x_{t|t-1} + K_t\,y_t,
+$$
+et en régime permanent, avec le rapport signal sur bruit $\lambda = q/r$,
+$$
+\bar P^{-} = \frac{q + \sqrt{q^2 + 4qr}}{2}, \qquad
+\bar K = \frac{\bar P^{-}}{\bar P^{-} + r} = \frac{\lambda + \sqrt{\lambda^2 + 4\lambda}}{2 + \lambda + \sqrt{\lambda^2 + 4\lambda}}.
+$$
+:::
+
+En régime permanent, la valeur filtrée suit $\hat x_t = (1-\bar K)\,\hat x_{t-1} + \bar K\,y_t$ : une **moyenne mobile exponentielle** de facteur $1 - \bar K$ et de demi-vie $\ln 0.5 / \ln(1 - \bar K)$. Le lissage exponentiel est un filtre de Kalman qui a oublié sa condition initiale.
+
+**Le gain comme poids de confiance.** $\mathbf{K}_t = \operatorname{Cov}(\mathbf{x}_t, \boldsymbol\nu_t)\operatorname{Var}(\boldsymbol\nu_t)^{-1}$ est le coefficient de régression de l'état sur l'innovation — le même $\operatorname{Cov}/\operatorname{Var}$ qu'une pente MCO en [[linear-regression|régression linéaire]]. Dans le cas scalaire, $r \to 0$ donne $K \to 1$ (l'observation est exacte, fais-lui entièrement confiance) et $P_{t|t-1} \to 0$ donne $K \to 0$ (la prédiction est exacte, ignore l'observation). Tout ce qui est entre les deux est un compromis pondéré par les précisions.
+
+## Dérivation
+
+Faisons-le en dimension un ; le cas matriciel est la même algèbre avec des transposées. Avant de voir $y_t$, l'état a pour a priori $x_t \sim \mathcal{N}(m, P)$, où $m = \hat x_{t|t-1}$ et $P = P_{t|t-1}$. La vraisemblance de l'observation est $y_t \mid x_t \sim \mathcal{N}(x_t, r)$. Le théorème de Bayes donne
+$$
+p(x_t \mid y_t) \propto \exp\!\Big(-\frac{(x_t - m)^2}{2P}\Big)\exp\!\Big(-\frac{(y_t - x_t)^2}{2r}\Big).
+$$
+L'exposant est quadratique en $x_t$, donc l'a posteriori est gaussien. En regroupant les termes, le coefficient de $x_t^2$ vaut $-\tfrac12(1/P + 1/r)$, donc la précision a posteriori vaut $1/P + 1/r$ : **les précisions s'additionnent**. Le coefficient de $x_t$ donne la moyenne a posteriori comme moyenne de la moyenne a priori et de l'observation pondérée par les précisions,
+$$
+m' = \frac{m/P + y_t/r}{1/P + 1/r} = m + \frac{P}{P + r}\,(y_t - m) = m + K\,(y_t - m),
+\qquad
+P' = \Big(\frac1P + \frac1r\Big)^{-1} = \frac{Pr}{P + r} = (1 - K)\,P.
+$$
+C'est l'étape de mise à jour. L'étape de prédiction n'est que l'application linéaire : si $x_{t-1} \sim \mathcal{N}(m', P')$ et $x_t = x_{t-1} + w_t$, alors $x_t \sim \mathcal{N}(m', P' + q)$ avant l'observation suivante. L'estimation est donc la moyenne a posteriori exacte, d'où l'estimateur de plus petite erreur quadratique moyenne ; sans gaussianité, la même récursion reste le meilleur estimateur *linéaire*, par le même argument que Gauss–Markov.
+
+**Moindres carrés récursifs.** Prenons $q = 0$ (l'état est une constante) et un a priori diffus $P_0 \to \infty$. Alors $P_{t|t} = r/t$, $K_t = 1/t$ et
+$$
+\hat x_t = \hat x_{t-1} + \frac1t\,(y_t - \hat x_{t-1}),
+$$
+qui est la moyenne empirique courante — l'estimation MCO d'une constante, calculée récursivement. Tout filtre de Kalman avec $\mathbf{Q} = \mathbf{0}$ est une régression par moindres carrés récursifs ; $\mathbf{Q} > \mathbf{0}$ ajoute de l'oubli, parce que la variance a priori est gonflée entre les observations, de sorte que les données anciennes ne dominent jamais complètement les nouvelles.
+
+**Régime permanent.** Dans le modèle de niveau local, la variance de prédiction à un pas obéit à la récursion de Riccati $P^-_{t+1} = \dfrac{P^-_t\, r}{P^-_t + r} + q$. Un point fixe vérifie $(P^-)^2 - qP^- - qr = 0$, dont la racine positive est le $\bar P^{-}$ ci-dessus ; la récursion y converge depuis n'importe quelle valeur initiale parce que l'application est croissante et concave. L'équation équivalente pour la variance filtrée est $\bar P^{2} + q\bar P - qr = 0$, celle que résout le code ci-dessous.
+
+**Innovations.** Sous le vrai modèle, les innovations $\boldsymbol\nu_t$ sont gaussiennes, non corrélées dans le temps, de covariance $\mathbf{S}_t$. C'est ainsi que $\mathbf{Q}$ et $\mathbf{R}$ s'estiment par maximum de vraisemblance (la log-vraisemblance vaut $-\tfrac12\sum_t \big[\ln\det \mathbf{S}_t + \boldsymbol\nu_t^\top\mathbf{S}_t^{-1}\boldsymbol\nu_t\big]$ à une constante près, la *décomposition en erreurs de prédiction*), et c'est ainsi qu'on diagnostique un filtre : des innovations autocorrélées signifient que le modèle est faux.
+
+## Hypothèses et cas limites
+
+- **Linéarité et gaussianité.** Une dynamique ou une observation non linéaire (un prix d'option fonction d'une volatilité latente) exige le filtre de Kalman étendu (linéariser) ou le filtre unscented (points sigma) ; un bruit à queues lourdes (sauts, mauvais ticks) exige un filtre particulaire ou au moins des innovations robustifiées, parce qu'une seule valeur aberrante déplace beaucoup un filtre gaussien.
+- **Seul le rapport $\mathbf{Q}/\mathbf{R}$ compte pour l'estimation.** Multiplier les deux par la même constante laisse $\mathbf{K}_t$ inchangé et ne fait que remettre $\mathbf{P}$ à l'échelle. Fixer ce rapport est tout l'art : trop de $q$ et le filtre court après le bruit, trop peu et il traîne derrière un état qui bouge. Estime-le par maximum de vraisemblance sur les innovations ou par erreur de prévision hors échantillon, pas à l'œil.
+- **Filtrage contre lissage.** $\hat{\mathbf{x}}_{t|t}$ n'utilise que les données jusqu'à $t$, donc il est utilisable en temps réel et sans anticipation. Le lisseur de Rauch–Tung–Striebel $\hat{\mathbf{x}}_{t|T}$ utilise tout l'échantillon : meilleur pour l'analyse historique, inutilisable pour trader.
+- **Initialisation.** Avec un a priori diffus ($\mathbf{P}_0$ énorme), les premiers pas sont dominés par les données ; de toute façon le filtre oublie $\hat{\mathbf{x}}_0$ au rythme $1 - \bar K$ par pas, donc la condition initiale compte rarement après un rodage de quelques demi-vies.
+- **Numérique.** $(\mathbf{I} - \mathbf{K}\mathbf{H})\mathbf{P}$ peut perdre sa symétrie ou son caractère défini positif en virgule flottante ; la forme de Joseph $(\mathbf{I}-\mathbf{K}\mathbf{H})\mathbf{P}(\mathbf{I}-\mathbf{K}\mathbf{H})^\top + \mathbf{K}\mathbf{R}\mathbf{K}^\top$ ou un filtre en racine carrée sont plus sûrs pour des états multidimensionnels.
+- **Observabilité.** Si une direction de l'état n'affecte jamais $\mathbf{y}$, sa variance croît sans limite : le filtre ne peut pas apprendre ce qu'il ne voit pas.
+
+## Exemple détaillé
+
+Un prix juste suit une marche aléatoire dont le pas quotidien a un écart-type de 0,05 ; les cotations que nous observons portent un bruit de microstructure d'écart-type 0,5, dix fois plus grand. On filtre les cotations avec le modèle de niveau local et on compare à la vérité cachée.
+
+```python
+import numpy as np
+
+rng = np.random.default_rng(11)
+n, q, r = 500, 0.05**2, 0.5**2                       # steps, state noise var, obs noise var
+x = 100 + np.cumsum(rng.normal(0, np.sqrt(q), n))    # latent fair price: random walk
+y = x + rng.normal(0, np.sqrt(r), n)                 # noisy quotes
+
+m, P = y[0], 1.0                                     # prior mean and variance
+m_filt, K_hist = np.empty(n), np.empty(n)
+for t in range(n):
+    # predict: random walk, so the mean is unchanged and the variance grows by q
+    m_pred, P_pred = m, P + q
+    # update: blend prediction and observation with the Kalman gain
+    K = P_pred / (P_pred + r)
+    m = m_pred + K * (y[t] - m_pred)
+    P = (1 - K) * P_pred
+    m_filt[t], K_hist[t] = m, K
+
+rmse_raw = np.sqrt(np.mean((y - x) ** 2))
+rmse_kf = np.sqrt(np.mean((m_filt - x) ** 2))
+# steady state: P solves P = (P + q) r / (P + q + r), i.e. P^2 + qP - qr = 0
+P_ss = (-q + np.sqrt(q**2 + 4 * q * r)) / 2
+K_ss = (P_ss + q) / (P_ss + q + r)
+print(f"RMSE raw quotes vs fair price : {rmse_raw:.4f}")
+print(f"RMSE Kalman filtered          : {rmse_kf:.4f}")
+print(f"steady-state gain: analytic {K_ss:.4f}, filter at last step {K_hist[-1]:.4f}")
+print(f"equivalent EWMA half-life: {np.log(0.5) / np.log(1 - K_ss):.1f} observations")
+```
+
+::: output
+```
+RMSE raw quotes vs fair price : 0.5157
+RMSE Kalman filtered          : 0.1457
+steady-state gain: analytic 0.0951, filter at last step 0.0951
+equivalent EWMA half-life: 6.9 observations
+```
+:::
+
+Le filtre divise l'erreur par 3,5. Avec $\lambda = q/r = 0.01$, le gain en régime permanent vaut $0.095$ : chaque nouvelle cotation déplace l'estimation de 9,5 % de la surprise, et le filtre est exactement une moyenne mobile exponentielle de demi-vie 7 observations. Le gain empirique a atteint la valeur analytique bien avant le pas 500. Pour sentir le compromis, change $q$ : à $q = r$ le gain vaut $0.62$ et le filtre suit les cotations presque une pour une ; à $q = 10^{-4}\,r$ le gain tombe à $0.01$ (demi-vie d'environ 70 cotations) et le filtre traîne derrière tout mouvement réel du prix juste.
+
+## Pourquoi c'est important en finance quantitative
+
+- **Ratio de couverture dynamique pour le pairs trading.** Modélise $y_t = \beta_t x_t + \varepsilon_t$ avec $\beta_t = \beta_{t-1} + w_t$ : l'état est le ratio de couverture, la matrice d'observation $H_t = x_t$ varie dans le temps, et le filtre produit un ratio qui s'adapte aux changements structurels au lieu de la pente fixe de [[linear-regression|régression linéaire]] estimée sur une fenêtre périmée. L'innovation $\nu_t$ est le spread lui-même, et sa valeur standardisée $\nu_t/\sqrt{S_t}$ est un z-score naturel pour les entrées et les sorties.
+- **Prix juste latent à partir de cotations bruitées.** Le rebond bid–ask, les cotations périmées et les transactions de petites quantités sont un bruit d'observation autour d'un prix efficient. Le modèle de niveau local ci-dessus est le plus simple des modèles de microstructure utilisés pour estimer ce prix et sa volatilité à partir de données tick.
+- **Bêta dynamique.** Le bêta de marché d'une action ou d'un fonds dérive ; le traiter comme un état en marche aléatoire donne un bêta variable dans le temps avec une bande de confiance, et une longueur de mémoire choisie par les données plutôt que par une fenêtre glissante arbitraire.
+- **Tout ce qui a un facteur latent.** Les modèles de structure par terme (niveau, pente et courbure latents), les approximations de volatilité stochastique, le nowcasting, et la combinaison de signaux — le filtre est la façon optimale de fusionner plusieurs estimations bruitées de la même chose — tiennent tous en forme espace-état.
+- **Lien avec les martingales.** La suite des innovations $\{\boldsymbol\nu_t\}$ est une [[martingales|différence de martingale]] par rapport à l'historique des observations : un filtre correct ne laisse aucune structure prévisible dans ses surprises, ce qui est le test pratique de l'adéquation du modèle.
+
+## Erreurs fréquentes
+
+::: pitfall Régler $q$ et $r$ à la main jusqu'à ce que le graphique soit joli
+Le graphique est toujours plus joli avec un $q$ plus petit (une courbe plus lisse), et le filtre traîne alors derrière chaque mouvement réel. Le rapport $q/r$ est un paramètre à estimer par la vraisemblance des innovations ou par l'erreur hors échantillon, exactement comme n'importe quel autre paramètre de modèle.
+:::
+
+::: pitfall Utiliser le lisseur dans un backtest
+$\hat{\mathbf{x}}_{t|T}$ utilise des observations futures. Un « ratio de couverture dynamique » lissé sur tout l'échantillon souffre de biais d'anticipation et aura l'air bien meilleur que tout ce qui est tradable.
+:::
+
+::: pitfall S'attendre à ce que le gain réagisse aux données
+Avec des matrices de système constantes, $\mathbf{P}_t$ et $\mathbf{K}_t$ sont déterministes étant donné $\mathbf{Q}$, $\mathbf{R}$, $\mathbf{H}$ : ils convergent vers le même régime permanent quelles que soient les observations. Le filtre ne peut pas remarquer que le niveau de bruit a changé si tu ne le modélises pas ($\mathbf{R}$ variable dans le temps, modèle à changement de régime).
+:::
+
+::: pitfall Prendre l'estimation filtrée pour la vérité
+$\hat{\mathbf{x}}_{t|t}$ vient avec $\mathbf{P}_{t|t}$. Un ratio de couverture de $0.8 \pm 0.3$ est une proposition de trading très différente de $0.8 \pm 0.02$.
+:::
+
+## Révision en 30 secondes
+
+Espace-état : $\mathbf{x}_t = \mathbf{F}\mathbf{x}_{t-1} + \mathbf{w}_t$, $\mathbf{y}_t = \mathbf{H}\mathbf{x}_t + \mathbf{v}_t$. Prédiction : pousser moyenne et covariance à travers $\mathbf{F}$, ajouter $\mathbf{Q}$. Mise à jour : gain $\mathbf{K} = \mathbf{P}^{-}\mathbf{H}^\top(\mathbf{H}\mathbf{P}^{-}\mathbf{H}^\top + \mathbf{R})^{-1}$, nouvelle moyenne = prédiction + $\mathbf{K}$ × innovation, nouvelle covariance $(\mathbf{I} - \mathbf{K}\mathbf{H})\mathbf{P}^{-}$. C'est Bayes avec des gaussiennes (les précisions s'additionnent, les moyennes sont pondérées par les précisions) ; avec $\mathbf{Q} = \mathbf{0}$ ce sont des moindres carrés récursifs, avec $\mathbf{Q} > \mathbf{0}$ le filtre oublie. Niveau local scalaire : gain en régime permanent fixé par $q/r$, et le filtre est une moyenne mobile exponentielle de facteur $1 - \bar K$.
+
+## Formules clés
+
+| Nom | Formule |
+|---|---|
+| Prédiction | $\hat{\mathbf{x}}_{t \vert t-1} = \mathbf{F}\hat{\mathbf{x}}_{t-1 \vert t-1}$, $\mathbf{P}_{t \vert t-1} = \mathbf{F}\mathbf{P}_{t-1 \vert t-1}\mathbf{F}^\top + \mathbf{Q}$ |
+| Gain | $\mathbf{K}_t = \mathbf{P}_{t \vert t-1}\mathbf{H}^\top(\mathbf{H}\mathbf{P}_{t \vert t-1}\mathbf{H}^\top + \mathbf{R})^{-1}$ |
+| Mise à jour | $\hat{\mathbf{x}}_{t \vert t} = \hat{\mathbf{x}}_{t \vert t-1} + \mathbf{K}_t(\mathbf{y}_t - \mathbf{H}\hat{\mathbf{x}}_{t \vert t-1})$, $\mathbf{P}_{t \vert t} = (\mathbf{I} - \mathbf{K}_t\mathbf{H})\mathbf{P}_{t \vert t-1}$ |
+| Mise à jour bayésienne scalaire | $m' = m + \frac{P}{P + r}(y - m)$, $1/P' = 1/P + 1/r$ |
+| Régime permanent du niveau local | $(\bar P^{-})^2 - q\bar P^{-} - qr = 0$, $\bar K = \bar P^{-}/(\bar P^{-} + r)$ |
+| Équivalence EWMA | $\hat x_t = (1 - \bar K)\hat x_{t-1} + \bar K y_t$ |
+
+## Questions d'entretien
+
+::: question Que représente le gain de Kalman, et que devient-il quand le bruit d'observation tend vers zéro, ou quand la variance de prédiction tend vers zéro ?
+::: hint
+Écris le gain scalaire $K = P/(P + r)$ et prends les limites.
+:::
+::: answer
+Le gain est le poids donné à la nouvelle observation par rapport à la prédiction du modèle ; de façon équivalente, le coefficient de régression de l'état sur l'innovation, $\operatorname{Cov}(x, \nu)/\operatorname{Var}(\nu)$. Si $r \to 0$, l'observation est exacte et $K \to 1$ : l'estimation saute sur la donnée. Si $P \to 0$, la prédiction est exacte et $K \to 0$ : l'observation est ignorée. Entre les deux, la moyenne a posteriori est la moyenne des deux pondérée par les précisions.
+:::
+:::
+
+::: question Montre qu'un modèle de niveau local avec $q = 0$ et un a priori diffus se réduit à la moyenne empirique courante.
+::: hint
+Avec $q = 0$, la variance prédite égale la variance filtrée précédente. Devine $P_{t|t} = r/t$ et vérifie par récurrence.
+:::
+::: answer
+Partons de $P_0 \to \infty$ ; après une observation, $K_1 = 1$, $\hat x_1 = y_1$ et $P_{1|1} = r$. Si $P_{t-1|t-1} = r/(t-1)$ alors, puisque $q = 0$, $P_{t|t-1} = r/(t-1)$, $K_t = \frac{r/(t-1)}{r/(t-1) + r} = \frac1t$, et $P_{t|t} = (1 - 1/t)\,r/(t-1) = r/t$. La mise à jour $\hat x_t = \hat x_{t-1} + \frac1t(y_t - \hat x_{t-1})$ est exactement la récursion de la moyenne empirique, et $r/t$ est sa variance. Le filtre avec $q = 0$ est une régression par moindres carrés récursifs ; $q > 0$ empêche le gain de tendre vers zéro, ce qui est le facteur d'oubli.
+:::
+:::
+
+::: question Dans le modèle de niveau local, pose $q = r$. Quel est le gain en régime permanent, et à quel lisseur exponentiel le filtre correspond-il ?
+::: hint
+Résous $(P^-)^2 - qP^- - qr = 0$ avec $q = r$, puis $\bar K = \bar P^-/(\bar P^- + r)$.
+:::
+::: answer
+Avec $q = r$ : $\bar P^{-} = r\,(1 + \sqrt5)/2$, donc $\bar K = \frac{(1+\sqrt5)/2}{(1+\sqrt5)/2 + 1} = \frac{1 + \sqrt5}{3 + \sqrt5} = \frac{\sqrt5 - 1}{2} \approx 0{,}618$, le conjugué du nombre d'or. Le filtre est une moyenne mobile exponentielle $\hat x_t = 0.382\,\hat x_{t-1} + 0.618\,y_t$ de demi-vie inférieure à une observation : quand l'état bouge autant que le bruit, il y a peu à gagner à moyenner et le filtre suit essentiellement les données. La règle générale est que le gain ne dépend que de $\lambda = q/r$, et il faut $\lambda \approx 0.01$ pour obtenir une demi-vie de 7 observations.
+:::
+:::
+
+::: question Construis un filtre de Kalman pour le ratio de couverture d'un pairs trade. Donne la forme espace-état, explique comment tu choisirais $q/r$, et ce qui se passe quand il est trop grand ou trop petit.
+::: hint
+La régression $y_t = \beta_t x_t + \varepsilon_t$ devient une équation d'observation avec un $H_t$ variable dans le temps.
+:::
+::: answer
+État $\beta_t$ (éventuellement avec une constante, $\mathbf{x}_t = (\alpha_t, \beta_t)^\top$) suivant une marche aléatoire, $\mathbf{F} = \mathbf{I}$, $\mathbf{Q} = \operatorname{diag}(q_\alpha, q_\beta)$ ; observation $y_t = \mathbf{H}_t\mathbf{x}_t + v_t$ avec $\mathbf{H}_t = (1, x_t)$ et $\operatorname{Var}(v_t) = r$. La prédiction laisse la moyenne inchangée et ajoute $\mathbf{Q}$ ; la mise à jour régresse la surprise $\nu_t = y_t - \hat\alpha - \hat\beta x_t$ sur l'état avec le gain $\mathbf{K}_t = \mathbf{P}_{t|t-1}\mathbf{H}_t^\top / (\mathbf{H}_t\mathbf{P}_{t|t-1}\mathbf{H}_t^\top + r)$ ; note que, parce que $\mathbf{H}_t$ dépend de $x_t$, le gain dépend maintenant des données. Choisis $q/r$ en maximisant la vraisemblance des innovations sur une fenêtre d'apprentissage, puis vérifie que les innovations sont blanches hors échantillon. Un $q$ trop grand : $\beta_t$ suit le bruit, le spread $\nu_t$ est petit par construction et la stratégie trade chaque frémissement à perte après coûts. Un $q$ trop petit : le filtre dégénère en MCO sur tout l'historique, $\beta_t$ traîne derrière un vrai changement de la relation et le « spread » tend pendant des semaines. Le signal de trading est l'innovation standardisée $\nu_t/\sqrt{S_t}$, qui tient déjà compte de l'incertitude courante sur le ratio.
+:::
+:::
