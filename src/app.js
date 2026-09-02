@@ -343,10 +343,10 @@
   if (svg) {
     const data = JSON.parse(document.getElementById("graph-data").textContent);
     const byId = Object.fromEntries(data.nodes.map((n) => [n.id, n]));
+    const edges = data.edges.filter((e) => byId[e.from] && byId[e.to]);
     const parents = {}, children = {};
     for (const n of data.nodes) { parents[n.id] = []; children[n.id] = []; }
-    for (const e of data.edges) {
-      if (!byId[e.from] || !byId[e.to]) continue;
+    for (const e of edges) {
       parents[e.to].push(e.from);
       children[e.from].push(e.to);
     }
@@ -360,32 +360,57 @@
       return depth[id];
     }
     data.nodes.forEach((n) => d(n.id));
-    const cols = {};
-    for (const n of data.nodes) (cols[depth[n.id]] ||= []).push(n);
-    // Order inside a column by average parent position to reduce crossings.
-    const pos = {};
-    const NW = 190, NH = 38, GX = 90, GY = 18, PAD = 30;
-    const maxDepth = Math.max(...Object.keys(cols).map(Number));
-    let maxRows = 0;
-    for (let c = 0; c <= maxDepth; c++) {
-      const col = cols[c] || [];
-      col.sort((a, b) => {
-        const pa = parents[a.id].map((p) => pos[p]?.y ?? 0);
-        const pb = parents[b.id].map((p) => pos[p]?.y ?? 0);
-        const ma = pa.length ? pa.reduce((x, y) => x + y, 0) / pa.length : 0;
-        const mb = pb.length ? pb.reduce((x, y) => x + y, 0) / pb.length : 0;
-        return ma - mb || a.subject.localeCompare(b.subject) || a.title.localeCompare(b.title);
-      });
-      maxRows = Math.max(maxRows, col.length);
-      col.forEach((n, i) => { pos[n.id] = { x: PAD + c * (NW + GX), y: PAD + i * (NH + GY) }; });
+    const maxDepth = Math.max(0, ...data.nodes.map((n) => depth[n.id]));
+
+    const NW = 190, NH = 38, DH = 12, GX = 90, GY = 16, PAD = 30;
+
+    // Layered layout. An edge spanning more than one column gets a dummy node in
+    // each column it crosses, so it is routed through a reserved empty slot
+    // instead of passing behind the opaque boxes that sit there.
+    const cols = Array.from({ length: maxDepth + 1 }, () => []);
+    for (const n of data.nodes) cols[depth[n.id]].push({ kind: "node", id: n.id, h: NH, node: n });
+
+    const routes = [];
+    const layPrev = {}, layNext = {};
+    const link = (a, b) => { (layPrev[b] ||= []).push(a); (layNext[a] ||= []).push(b); };
+    for (const e of edges) {
+      const chain = [e.from];
+      for (let k = 1; k < depth[e.to] - depth[e.from]; k++) {
+        const id = `~${e.from}~${e.to}~${k}`;
+        cols[depth[e.from] + k].push({ kind: "dummy", id, h: DH });
+        chain.push(id);
+      }
+      chain.push(e.to);
+      for (let i = 0; i + 1 < chain.length; i++) link(chain[i], chain[i + 1]);
+      routes.push({ from: e.from, to: e.to, chain });
     }
-    // Centre columns vertically.
-    const H = PAD * 2 + maxRows * (NH + GY) - GY;
-    for (let c = 0; c <= maxDepth; c++) {
-      const col = cols[c] || [];
-      const h = col.length * (NH + GY) - GY;
-      const off = (H - PAD * 2 - h) / 2;
-      col.forEach((n) => (pos[n.id].y += off));
+
+    const pos = {};
+    let H = 0;
+    function place() {
+      const colH = [];
+      for (let c = 0; c <= maxDepth; c++) {
+        let y = 0;
+        for (const it of cols[c]) { pos[it.id] = { x: PAD + c * (NW + GX), y, h: it.h }; y += it.h + GY; }
+        colH[c] = Math.max(0, y - GY);
+      }
+      H = Math.max(...colH, NH) + PAD * 2;
+      for (let c = 0; c <= maxDepth; c++) {
+        const off = PAD + (H - PAD * 2 - colH[c]) / 2;
+        for (const it of cols[c]) pos[it.id].y += off;
+      }
+    }
+    const mid = (id) => pos[id].y + pos[id].h / 2;
+    function bary(it, adj) {
+      const ns = (adj[it.id] || []).filter((x) => pos[x]);
+      return ns.length ? ns.reduce((s, x) => s + mid(x), 0) / ns.length : mid(it.id);
+    }
+    // A few barycentre sweeps: order each column by where its neighbours sit,
+    // which is what keeps the long routed edges from crossing each other.
+    place();
+    for (let pass = 0; pass < 4; pass++) {
+      for (let c = 1; c <= maxDepth; c++) { cols[c].sort((a, b) => bary(a, layPrev) - bary(b, layPrev)); place(); }
+      for (let c = maxDepth - 1; c >= 0; c--) { cols[c].sort((a, b) => bary(a, layNext) - bary(b, layNext)); place(); }
     }
     const W = PAD * 2 + (maxDepth + 1) * NW + maxDepth * GX;
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
@@ -403,18 +428,33 @@
     defs.appendChild(marker);
     svg.appendChild(defs);
 
-    const edgeEls = [];
-    for (const e of data.edges) {
-      const a = pos[e.from], b = pos[e.to];
-      if (!a || !b) continue;
-      const x1 = a.x + NW, y1 = a.y + NH / 2, x2 = b.x, y2 = b.y + NH / 2;
-      const cx = (x1 + x2) / 2;
-      const p = el("path", { d: `M${x1},${y1} C${cx},${y1} ${cx},${y2} ${x2},${y2}`, class: "edge", "marker-end": "url(#arrow)" });
-      p.dataset.from = e.from;
-      p.dataset.to = e.to;
-      svg.appendChild(p);
-      edgeEls.push(p);
+    function pathThrough(chain) {
+      // A dummy contributes two points, so the edge crosses its column as a
+      // straight horizontal line inside the reserved slot. All the vertical
+      // movement then happens in the gaps between columns, where nothing sits.
+      const pts = [];
+      chain.forEach((id, i) => {
+        const p = pos[id];
+        const y = p.y + p.h / 2;
+        if (i === 0) pts.push([p.x + NW, y]);
+        else if (i === chain.length - 1) pts.push([p.x, y]);
+        else pts.push([p.x, y], [p.x + NW, y]);
+      });
+      let d = `M${pts[0][0]},${pts[0][1]}`;
+      for (let i = 1; i < pts.length; i++) {
+        const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], cx = (x0 + x1) / 2;
+        d += ` C${cx},${y0} ${cx},${y1} ${x1},${y1}`;
+      }
+      return d;
     }
+
+    const edgeEls = routes.map((r) => {
+      const p = el("path", { d: pathThrough(r.chain), class: "edge", "marker-end": "url(#arrow)" });
+      p.dataset.from = r.from;
+      p.dataset.to = r.to;
+      svg.appendChild(p);
+      return p;
+    });
     const nodeEls = {};
     for (const n of data.nodes) {
       const g = el("g", { class: "node", transform: `translate(${pos[n.id].x},${pos[n.id].y})` });
