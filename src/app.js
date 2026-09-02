@@ -389,7 +389,7 @@
     }
     const W = PAD * 2 + (maxDepth + 1) * NW + maxDepth * GX;
     svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
-    svg.style.height = Math.max(320, H) + "px";
+    svg.style.width = W + "px";
 
     const ns = "http://www.w3.org/2000/svg";
     const el = (tag, attrs = {}) => {
