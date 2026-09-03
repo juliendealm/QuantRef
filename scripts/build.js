@@ -10,7 +10,7 @@ import anchor from "markdown-it-anchor";
 import container from "markdown-it-container";
 import texmath from "markdown-it-texmath";
 import katex from "katex";
-import { site, subjects, sections, sectionOrder, openSections, ui } from "../site.config.js";
+import { site, subjects, sections, sectionOrder, openSections, ui, visuals } from "../site.config.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const SRC = path.join(ROOT, "src");
@@ -88,6 +88,26 @@ function makeMarkdown(lang) {
       return tokens[idx].nesting === 1
         ? `<div class="output"><div class="output-head">${t.output}</div>\n`
         : "</div>\n";
+    },
+  });
+
+  // ::: viz <id> Optional caption   (interactive visual, mounted by src/viz.js)
+  md.use(container, "viz", {
+    render(tokens, idx) {
+      const tok = tokens[idx];
+      if (tok.nesting === 1) {
+        const info = tok.info.trim().replace(/^viz\s*/, "");
+        const [id, ...rest] = info.split(/\s+/);
+        const caption = rest.join(" ");
+        if (!visuals.includes(id)) console.warn(`  warning: unknown visual "${id}"`);
+        return (
+          `<figure class="viz" data-viz="${escapeHtml(id)}">` +
+          `<figcaption><span class="viz-kind">${t.visual}</span>${caption ? `<span class="viz-caption">${md.renderInline(caption)}</span>` : ""}</figcaption>` +
+          `<div class="viz-body"><noscript><p class="viz-hint">${t.vizFallback}</p></noscript></div>` +
+          `<div class="viz-note">\n`
+        );
+      }
+      return "</div></figure>\n";
     },
   });
 
@@ -366,6 +386,7 @@ ${body}
   <a href="${site.repo}">GitHub</a>
 </footer>
 <script src="${rel}assets/app.js"></script>
+<script src="${rel}assets/viz.js"></script>
 </body>
 </html>`;
 }

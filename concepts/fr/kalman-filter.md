@@ -13,6 +13,10 @@ related: [martingales]
 
 Tu veux une quantité que tu ne peux pas observer — un prix juste, un ratio de couverture, un bêta — mais tu en reçois une lecture bruitée à chaque tick. Deux sources s'affrontent : ce que ton **modèle** dit qu'elle devrait valoir maintenant, sachant l'instant précédent, et ce que dit la **nouvelle observation**. Le filtre en prend une moyenne pondérée, et le poids — le gain de Kalman — est fixé par la source la moins incertaine. Modèle précis et mesures bruitées : gain petit, tu bouges à peine. Modèle vague et mesures propres : gain proche de 1, tu sautes sur la donnée.
 
+::: viz kalman-filter Croire le modèle ou croire les données
+Q et R sont ce que croit le filtre, pas ce qui a généré les données. Augmente R et l'estimation devient molle ; augmente Q et elle poursuit le bruit — le gain K résume tout l'arbitrage en un nombre.
+:::
+
 ## Formules clés
 
 | Nom | Formule |

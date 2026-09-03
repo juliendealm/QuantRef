@@ -13,6 +13,10 @@ related: [value-at-risk]
 
 Les grecques sont les dérivées partielles du prix de l'option — les coefficients d'un développement de Taylor en chaque paramètre. Le **delta** dit à combien d'actions l'option ressemble, donc c'est le ratio de couverture ; le **gamma** dit à quelle vitesse le delta change, c'est la convexité que l'on détient quand on est long d'options et que l'on doit quand on est court ; le **véga** est l'exposition à la volatilité implicite, le **thêta** le loyer quotidien payé pour la convexité, le **rhô** la sensibilité aux taux. Le pivot est gamma contre thêta : une option longue couverte en delta gagne $\tfrac12\Gamma\,(dS)^2$ par mouvement et paie $\Theta\,dt$ d'érosion, et dans [[black-scholes]] les deux s'équilibrent exactement quand l'action bouge à la volatilité implicite. C'est tout le métier du trading de volatilité.
 
+::: viz greeks Chaque grecque en fonction du spot
+Change de grecque et raccourcis la maturité : le delta devient une marche, le gamma et le thêta explosent au strike, le véga s'éteint. C'est à la monnaie et à court terme que toutes les grecques deviennent instables.
+:::
+
 ## Formules clés
 
 | Nom | Formule |

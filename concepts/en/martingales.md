@@ -13,6 +13,10 @@ related: [brownian-motion, black-scholes]
 
 A martingale is a fair game: whatever has happened so far, your expected fortune after the next round equals your fortune now — not "zero mean overall", but conditionally on the whole history. The consequence is a no-free-lunch statement: no betting strategy that chooses its stake from the past alone turns a martingale into a game with positive expectation, at least not in bounded time on bounded credit. In finance the fair game is not the stock price under $\mathbb{P}$ (stocks earn a risk premium) but the *discounted* price under the risk-neutral measure $\mathbb{Q}$, and derivative pricing is that statement plus the tower property of [[conditional-probability|conditional expectation]].
 
+::: viz martingales A fair game, and a barely unfair one
+At p = 0.5 the average across paths stays pinned at zero however wild the individual paths get. Nudge p by half a percent and the average drifts off — no stopping rule can bring it back.
+:::
+
 ## Key Formulas
 
 | Name | Formula |

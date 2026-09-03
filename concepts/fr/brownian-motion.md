@@ -13,6 +13,10 @@ related: [ito-lemma, black-scholes]
 
 Prends une marche aléatoire à pile ou face et accélère-la : $n$ pas par unité de temps, chacun de taille $1/\sqrt{n}$ — la seule échelle qui maintienne la variance à $t$ quel que soit $n$, puisque après un temps $t$ il y a $nt$ pas de variance $1/n$. La limite est le **mouvement brownien** : une trajectoire continue qui reste, à toute échelle, une somme de petits chocs indépendants. Zoome dessus et elle ressemble à l'ensemble, sans tangente nulle part. Sur un petit intervalle $h$, elle bouge d'environ $\sqrt{h}$, bien plus que le $h$ d'une courbe lisse — c'est pourquoi $(dW)^2$ n'est pas négligeable et pourquoi le [[ito-lemma|calcul d'Itô]] remplace le calcul ordinaire.
 
+::: viz brownian-motion Des trajectoires dans l'enveloppe en √t
+La dispersion croît en √t, pas en t : l'enveloppe est une parabole couchée. Ajoute des trajectoires : environ 95 % restent à l'intérieur.
+:::
+
 ## Formules clés
 
 | Nom | Formule |

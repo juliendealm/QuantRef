@@ -13,6 +13,10 @@ related: [black-scholes, martingales]
 
 Le calcul ordinaire jette le terme du second ordre $\tfrac12 f''(x)\,(dx)^2$ parce que $(dx)^2$ tend vers zéro bien plus vite que $dt$. Le mouvement brownien casse ce raisonnement : sur un pas $dt$, l'accroissement $dW \sim \mathcal{N}(0, dt)$ a une taille typique $\sqrt{dt}$, donc $(dW)^2$ est d'ordre $dt$, et le sommer sur $[0, T]$ donne $T$, pas zéro — la variation quadratique du [[brownian-motion|mouvement brownien]]. Le terme du second ordre survit donc, et une fonction du mouvement brownien acquiert une dérive supplémentaire $\tfrac12 f''(W_t)\,dt$. Le lemme d'Itô, ce n'est rien d'autre : **Taylor à l'ordre 2, remplacer $(dW)^2$ par $dt$, jeter tout ce qui est plus petit.**
 
+::: viz ito-lemma D'où vient le −½σ²
+Les deux courbes viennent de la même dérive μ. Augmente σ : la moyenne croît en μ alors que la trajectoire typique croît en μ − σ²/2, et l'écart est exactement la correction d'Itô.
+:::
+
 ## Formules clés
 
 | Nom | Formule |

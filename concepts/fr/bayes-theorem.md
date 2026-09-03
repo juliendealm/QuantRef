@@ -15,6 +15,10 @@ On connaît en général les probabilités dans le sens *direct* : en régime ba
 
 Pense en cotes : les cotes a priori fois le **rapport de vraisemblance** donnent les cotes a posteriori. Une observation ne dit jamais quoi croire, seulement de combien *bouger*. Le mouvement est multiplicatif, donc les mises à jour s'enchaînent — le posterior d'aujourd'hui est le prior de demain, ce que fait un [[kalman-filter|filtre de Kalman]] ou un modèle à changement de régime, tick après tick.
 
+::: viz bayes-theorem Un test fiable à 99 % sur une maladie rare
+Garde la sensibilité et la spécificité élevées et fais baisser la prévalence : les faux positifs écrasent les vrais positifs bien avant que le test devienne mauvais. C'est le taux de base qui pilote la probabilité a posteriori.
+:::
+
 ## Formules clés
 
 | Nom | Formule |

@@ -13,6 +13,10 @@ related: [black-scholes, greeks, value-at-risk]
 
 Volatility is the standard deviation of returns: the square root of the [[variance]], back in return units. "This stock has a 20 % vol" means its yearly return lands within $\pm 20\%$ of its mean about two thirds of the time. Three things make it subtler than a textbook standard deviation. It is **quoted annualised** whatever the sampling frequency — $1\%$ daily becomes "16 % vol", since $0.01\sqrt{252} \approx 0.159$. It is **not constant**: calm and violent days cluster, which makes volatility genuinely forecastable where returns are not. And it is **never observed**, only estimated — from past returns, from a model, or from option prices.
 
+::: viz volatility How noisy a realised-volatility estimate is
+The blue line is the true σ that generated the returns; the orange line is what a rolling window estimates. Shorten the window and the estimate swings wildly around a σ that never moved.
+:::
+
 ## Key Formulas
 
 | Name | Formula |

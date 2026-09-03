@@ -13,6 +13,10 @@ related: [black-scholes, greeks, value-at-risk]
 
 La volatilité est l'écart-type des rendements : la racine carrée de la [[variance]], remise dans les unités du rendement. « Cette action a une vol de 20 % » signifie que son rendement annuel se situe à moins de $\pm 20\,\%$ de sa moyenne environ deux fois sur trois. Trois choses la rendent plus subtile qu'un écart-type de manuel. Elle est **cotée en annualisé** quelle que soit la fréquence d'échantillonnage — $1\,\%$ par jour devient « vol à 16 % », car $0{,}01\sqrt{252} \approx 0{,}159$. Elle **n'est pas constante** : les journées calmes et les journées violentes se regroupent, ce qui rend la volatilité prévisible là où les rendements ne le sont pas. Et elle **n'est jamais observée**, seulement estimée — à partir des rendements passés, d'un modèle, ou des prix d'options.
 
+::: viz volatility À quel point une volatilité réalisée est bruitée
+La ligne bleue est le σ vrai qui a généré les rendements ; la ligne orange est ce qu'estime une fenêtre glissante. Raccourcis la fenêtre et l'estimation oscille violemment autour d'un σ qui n'a jamais bougé.
+:::
+
 ## Formules clés
 
 | Nom | Formule |

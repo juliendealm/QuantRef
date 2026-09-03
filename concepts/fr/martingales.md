@@ -13,6 +13,10 @@ related: [brownian-motion, black-scholes]
 
 Une martingale est un jeu équitable : quoi qu'il se soit passé jusqu'ici, ta fortune espérée après le prochain tour est égale à ta fortune actuelle — pas « une moyenne nulle dans l'ensemble », mais conditionnellement à toute l'histoire. La conséquence est un énoncé d'absence de repas gratuit : aucune stratégie de mise choisissant son enjeu à partir du seul passé ne transforme une martingale en jeu à espérance positive, du moins pas en temps borné et à crédit borné. En finance, le jeu équitable n'est pas le prix de l'action sous $\mathbb{P}$ (les actions rémunèrent une prime de risque) mais le prix *actualisé* sous la mesure risque-neutre $\mathbb{Q}$, et tout le pricing de dérivés tient dans cet énoncé plus la propriété de tour de l'[[conditional-probability|espérance conditionnelle]].
 
+::: viz martingales Un jeu équitable, et un jeu à peine biaisé
+À p = 0,5 la moyenne sur les trajectoires reste collée à zéro, aussi agitées soient les trajectoires. Décale p d'un demi-point et la moyenne dérive — aucune règle d'arrêt ne la ramènera.
+:::
+
 ## Formules clés
 
 | Nom | Formule |

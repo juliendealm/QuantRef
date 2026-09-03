@@ -13,6 +13,10 @@ related: [greeks, linear-regression]
 
 « Avec 99 % de confiance, nous ne perdrons pas plus de 2,6 % demain. » Avance depuis la gauche de la distribution de la perte de demain jusqu'à laisser 99 % de la masse derrière toi : la perte à cet endroit est $\mathrm{VaR}_{0{,}99}$. Elle donne la frontière de la queue en devise, ce qui rend comparables un book actions et un book taux. Elle ne dit rien de ce qui se trouve *au-delà* : 1 % des jours perdent plus de 1 M, mais « plus » peut valoir 1,1 M ou 50 M. Trois choix définissent toute VaR — horizon, niveau $\alpha$, modèle de perte.
 
+::: viz value-at-risk Le seuil, et tout ce qu'il y a derrière
+La VaR est la position de la ligne orange ; l'expected shortfall est la moyenne de la queue ombrée derrière elle. Baisse les degrés de liberté pour épaissir les queues : la VaR bouge à peine, l'ES beaucoup.
+:::
+
 ## Formules clés
 
 | Nom | Formule |

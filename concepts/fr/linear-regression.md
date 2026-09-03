@@ -13,6 +13,10 @@ related: [kalman-filter, value-at-risk]
 
 Empile les observations $y_i$ dans un vecteur $\mathbf{y} \in \mathbb{R}^n$ et les régresseurs dans les colonnes de $\mathbf{X}$. Tout vecteur ajusté $\mathbf{X}\boldsymbol\beta$ vit dans l'espace des colonnes de $\mathbf{X}$, un plan de dimension $k$ à l'intérieur de $\mathbb{R}^n$, et les moindres carrés choisissent le point de ce plan **le plus proche** de $\mathbf{y}$ : la projection orthogonale. Le résidu est perpendiculaire à chaque régresseur. Équations normales, forme fermée, $R^2$ — tout le reste est un corollaire de cet angle droit.
 
+::: viz linear-regression Les moindres carrés, et leur problème de levier
+Fais glisser un point et regarde les résidus. Un point éloigné en x déplace à lui seul toute la droite — c'est le levier, et le R² peut rester élevé alors que l'ajustement n'a plus de sens.
+:::
+
 ## Formules clés
 
 | Nom | Formule |

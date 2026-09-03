@@ -15,6 +15,10 @@ Probability is always relative to what you know. Before any dice are rolled, the
 
 Conditioning is nothing more than **restricting the sample space** to the outcomes compatible with what you learned, then renormalising. In finance, "what you know" at time $t$ is the information set $\mathcal{F}_t$: every fair price, forecast and risk number is $\mathbb{E}[X \mid \mathcal{F}_t]$, not $\mathbb{E}[X]$.
 
+::: viz conditional-probability Conditioning as a shrinking population
+The grid is the whole population; the coloured block at the top is B. Conditioning on B means reading only that block, and P(A|B) is the orange share of it. Watch P(B|A) move on its own — conditioning is not symmetric.
+:::
+
 ## Key Formulas
 
 | Name | Formula |
