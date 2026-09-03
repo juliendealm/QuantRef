@@ -13,6 +13,10 @@ related: [greeks, linear-regression]
 
 "With 99 % confidence we will not lose more than 2.6 % tomorrow." Walk from the left of tomorrow's loss distribution until 99 % of the mass is behind you: the loss there is $\mathrm{VaR}_{0.99}$. It gives the boundary of the tail in currency, so an equity book and a rates book compare. It says nothing about what lies *beyond*: 1 % of days lose more than 1 M, but "more" could be 1.1 M or 50 M. Three choices define any VaR — horizon, level $\alpha$, loss model.
 
+::: viz value-at-risk The cut, and everything past it
+VaR is the position of the orange line; expected shortfall is the average of the shaded tail behind it. Lower the degrees of freedom to fatten the tails: VaR barely moves, ES does.
+:::
+
 ## Key Formulas
 
 | Name | Formula |

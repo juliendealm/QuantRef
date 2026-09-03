@@ -13,6 +13,10 @@ related: [greeks, brownian-motion]
 
 Une option se valorise par **réplication**, non en prévoyant l'action : un portefeuille d'actions et de cash qui reproduit le payoff dans tous les scénarios doit coûter exactement ce que coûte l'option, sinon il y a un déjeuner gratuit. Sous un mouvement brownien géométrique à volatilité constante et avec du trading continu, ce portefeuille existe — il détient $\Delta = \partial V/\partial S$ actions, rééquilibrées en continu. La dérive $\mu$ s'annule ; seule $\sigma$ compte, car elle fixe l'ampleur des ajustements. De façon équivalente : le portefeuille couvert est sans risque donc il rapporte $r$ (une EDP), ou les prix actualisés sont des [[martingales]] sous une probabilité risque-neutre $\mathbb{Q}$.
 
+::: viz black-scholes Le prix face au payoff
+La courbe orange est le prix aujourd'hui, la ligne brisée grise le payoff à maturité. Amène la maturité vers zéro et la courbe lisse s'écrase sur le coude — la valeur temps, c'est exactement l'écart entre les deux.
+:::
+
 ## Formules clés
 
 | Nom | Formule |

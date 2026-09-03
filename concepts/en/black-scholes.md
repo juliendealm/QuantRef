@@ -13,6 +13,10 @@ related: [greeks, brownian-motion]
 
 An option is priced by **replication**, not by forecasting the stock: a portfolio of stock and cash reproducing the payoff in every scenario must cost exactly what the option costs, or there is a free lunch. Under geometric Brownian motion with constant volatility and continuous trading that portfolio exists — hold $\Delta = \partial V/\partial S$ shares, rebalanced continuously. The drift $\mu$ cancels; only $\sigma$ matters, since it sets how much the hedge moves. Equivalently: the hedged portfolio is riskless so it earns $r$ (a PDE), or discounted prices are [[martingales]] under a risk-neutral $\mathbb{Q}$.
 
+::: viz black-scholes Price against payoff
+The orange curve is the price now, the grey kink the payoff at expiry. Drag maturity toward zero and the smooth curve collapses onto the kink — time value is the whole distance between them.
+:::
+
 ## Key Formulas
 
 | Name | Formula |

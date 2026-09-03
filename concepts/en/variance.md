@@ -15,6 +15,10 @@ The mean tells you where a random variable sits; the variance tells you how far 
 
 Squaring is not arbitrary: it makes variance **additive** across independent sources of randomness, and makes the mean the point minimising it. That is why variance, not mean absolute deviation, sits under least squares, portfolio optimisation and the central limit theorem. Its square root, the **standard deviation**, is back in return units — for returns, [[volatility]]. You compute the variance and quote the volatility.
 
+::: viz variance Variance as an average of squares
+Drag any point. Each square is one squared deviation, so a single far point dominates the total — the mean and the variance both have no resistance to outliers.
+:::
+
 ## Key Formulas
 
 | Name | Formula |

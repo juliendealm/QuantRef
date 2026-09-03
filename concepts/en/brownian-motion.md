@@ -13,6 +13,10 @@ related: [ito-lemma, black-scholes]
 
 Take a coin-flip random walk and speed it up: $n$ steps per unit of time, each of size $1/\sqrt{n}$ — the only scaling that keeps the variance at $t$ whatever $n$ is, since after time $t$ there are $nt$ steps of variance $1/n$. The limit is **Brownian motion**: a continuous path that is, at every scale, a sum of tiny independent shocks. Zoom in and it looks like the whole, with no tangent line anywhere. Over a small interval $h$ it moves by about $\sqrt{h}$, far more than the $h$ of a smooth curve — which is why $(dW)^2$ is not negligible and why [[ito-lemma|Itô's calculus]] replaces ordinary calculus.
 
+::: viz brownian-motion Paths inside the √t envelope
+Spread grows like √t, not t: the envelope is a parabola on its side. Add paths and about 95 % of them stay inside it.
+:::
+
 ## Key Formulas
 
 | Name | Formula |

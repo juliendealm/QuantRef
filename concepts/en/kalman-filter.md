@@ -13,6 +13,10 @@ related: [martingales]
 
 You want a quantity you cannot observe — a fair price, a hedge ratio, a beta — but you get a noisy reading of it every tick. Two sources compete: what your **model** says it should be now, given a moment ago, and what the **new observation** says. The filter takes a weighted average, and the weight — the Kalman gain — is set by which source is currently less uncertain. Precise model and noisy measurements: small gain, you barely move. Vague model and clean measurements: gain near 1, you jump to the data.
 
+::: viz kalman-filter Trusting the model against trusting the data
+Q and R are what the filter believes, not what generated the data. Raise R and the estimate turns sluggish; raise Q and it chases the noise — the gain K is the whole trade-off in one number.
+:::
+
 ## Key Formulas
 
 | Name | Formula |

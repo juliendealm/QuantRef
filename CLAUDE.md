@@ -8,7 +8,7 @@ Personal quantitative-finance reference notes, built into a static site for GitH
 - `site.config.js` — languages, subject list, UI strings, recognised section headings.
 - `scripts/build.js` — renders Markdown + KaTeX to `dist/` (no client-side math).
 - `scripts/new.js` — `npm run new -- "Title" --subject <id>` scaffolds a concept in every language.
-- `src/` — `style.css`, `app.js` (search, theme, spaced repetition, prerequisite graph).
+- `src/` — `style.css`, `app.js` (search, theme, spaced repetition, prerequisite graph), `viz.js` (interactive visuals).
 - `.claude/agents/` — `concept-writer` (creates concepts) and `concept-reviewer` (read-only checks).
 
 ## Commands
@@ -86,6 +86,10 @@ Markup available inside the body:
 - `::: formula Label` … `:::` — key formula callout (counted on the dashboard).
 - `::: pitfall Title` … `:::` — warning callout.
 - Fenced ```python block followed by `::: output` … ``` … ``` … `:::` — code plus its real output.
+- `::: viz <slug>  Caption` … `:::` — interactive visual. The body is a short note
+  telling the reader what to try; the visual itself is a builder in `src/viz.js`,
+  keyed by the id, and the id must be listed in `visuals` in `site.config.js`.
+  One per concept, at the end of Intuition.
 - `::: question Question text` containing `::: hint` … `:::` and `::: answer` … `:::` — interview question (collected into the interview bank). Closing markers: hint, answer, then question.
 
 Style: tutorial voice, precise, concrete numbers, finance applications. French files are full translations of the English content (same formulas, same examples, same code, same output), not summaries. Code comments stay in English. Reference example: `concepts/en/conditional-probability.md` and its French twin.

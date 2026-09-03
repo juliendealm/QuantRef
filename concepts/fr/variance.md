@@ -15,6 +15,10 @@ La moyenne dit où se situe une variable aléatoire ; la variance dit de combien
 
 Le carré n'est pas arbitraire : il rend la variance **additive** entre sources de hasard indépendantes, et fait de la moyenne le point qui la minimise. D'où la variance, et non l'écart absolu moyen, sous les moindres carrés, l'optimisation de portefeuille et le théorème central limite. Sa racine, l'**écart-type**, revient dans les unités du rendement — pour des rendements, la [[volatility|volatilité]]. On calcule la variance et on cote la volatilité.
 
+::: viz variance La variance comme moyenne de carrés
+Fais glisser un point. Chaque carré est un écart au carré : un seul point éloigné domine le total — la moyenne et la variance ne résistent pas aux valeurs extrêmes.
+:::
+
 ## Formules clés
 
 | Nom | Formule |

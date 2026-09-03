@@ -51,6 +51,23 @@ export const sectionOrder = {
 
 export const openSections = 4; // how many of sectionOrder render expanded
 
+// Interactive visuals available to `::: viz <id>`. Each id must have a builder
+// in src/viz.js; the build warns on any id that is not listed here.
+export const visuals = [
+  "conditional-probability",
+  "bayes-theorem",
+  "variance",
+  "volatility",
+  "brownian-motion",
+  "martingales",
+  "ito-lemma",
+  "black-scholes",
+  "greeks",
+  "value-at-risk",
+  "linear-regression",
+  "kalman-filter",
+];
+
 // Section headings that the build recognises (for the revision card and interview bank).
 export const sections = {
   en: { revision: "30-Second Revision", formulas: "Key Formulas", interview: "Interview Questions" },
@@ -119,6 +136,8 @@ export const ui = {
     hint: "Hint",
     answer: "Answer",
     pitfall: "Pitfall",
+    visual: "Interactive",
+    vizFallback: "This visual needs JavaScript.",
   },
   fr: {
     langName: "Français",
@@ -181,5 +200,7 @@ export const ui = {
     hint: "Indice",
     answer: "Réponse",
     pitfall: "Piège",
+    visual: "Interactif",
+    vizFallback: "Ce visuel nécessite JavaScript.",
   },
 };

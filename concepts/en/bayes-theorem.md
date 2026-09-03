@@ -15,6 +15,10 @@ You usually know probabilities in the *forward* direction: in a bear regime, thi
 
 Think in odds: prior odds times the **likelihood ratio** gives posterior odds. Evidence never tells you what to believe, only how much to *move*. The move is multiplicative, so updates chain — today's posterior is tomorrow's prior, which is all a [[kalman-filter|Kalman filter]] or a regime-switching model does, tick after tick.
 
+::: viz bayes-theorem A 99% accurate test on a rare disease
+Keep sensitivity and specificity high and drag the prevalence down: false positives swamp true positives long before the test gets bad. The posterior is driven by the base rate.
+:::
+
 ## Key Formulas
 
 | Name | Formula |

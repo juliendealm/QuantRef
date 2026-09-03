@@ -13,6 +13,10 @@ related: [kalman-filter, value-at-risk]
 
 Stack the observations $y_i$ into a vector $\mathbf{y} \in \mathbb{R}^n$ and the regressors into the columns of $\mathbf{X}$. Any fitted vector $\mathbf{X}\boldsymbol\beta$ lives in the column space of $\mathbf{X}$, a $k$-dimensional plane inside $\mathbb{R}^n$, and least squares picks the point of that plane **closest** to $\mathbf{y}$: the orthogonal projection. The residual is perpendicular to every regressor. Normal equations, closed form, $R^2$ — everything else is a corollary of that right angle.
 
+::: viz linear-regression Least squares, and its leverage problem
+Drag a point and watch the residuals. A point far out in x moves the whole line on its own — that is leverage, and R² can stay high while the fit becomes meaningless.
+:::
+
 ## Key Formulas
 
 | Name | Formula |

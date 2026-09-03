@@ -13,6 +13,10 @@ related: [black-scholes, martingales]
 
 Ordinary calculus discards the second-order term $\tfrac12 f''(x)\,(dx)^2$ because $(dx)^2$ vanishes much faster than $dt$. Brownian motion breaks that: over a step $dt$ the increment $dW \sim \mathcal{N}(0, dt)$ has typical size $\sqrt{dt}$, so $(dW)^2$ is of order $dt$, and summing it over $[0, T]$ gives $T$, not zero — the quadratic variation of [[brownian-motion|Brownian motion]]. The second-order term therefore survives, and a function of Brownian motion picks up an extra drift $\tfrac12 f''(W_t)\,dt$. That is all Itô's lemma is: **Taylor to second order, replace $(dW)^2$ by $dt$, drop everything smaller.**
 
+::: viz ito-lemma Where the −½σ² comes from
+Both curves come from the same drift μ. Raise σ: the mean grows at μ while the typical path grows at μ − σ²/2, and the gap is exactly the Itô correction.
+:::
+
 ## Key Formulas
 
 | Name | Formula |

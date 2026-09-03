@@ -15,6 +15,10 @@ Une probabilité est toujours relative à ce que l'on sait. Avant de lancer deux
 
 Conditionner, ce n'est rien d'autre que **restreindre l'espace des possibles** aux issues compatibles avec l'information reçue, puis renormaliser. En finance, « ce que l'on sait » à l'instant $t$ est l'ensemble d'information $\mathcal{F}_t$ : tout prix juste, toute prévision, tout chiffre de risque vaut $\mathbb{E}[X \mid \mathcal{F}_t]$, et non $\mathbb{E}[X]$.
 
+::: viz conditional-probability Conditionner, c'est réduire la population
+La grille est toute la population ; le bloc coloré du haut est B. Conditionner par B, c'est ne lire que ce bloc, et P(A|B) en est la part orange. Regarde P(B|A) bouger de son côté — le conditionnement n'est pas symétrique.
+:::
+
 ## Formules clés
 
 | Nom | Formule |

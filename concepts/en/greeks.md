@@ -13,6 +13,10 @@ related: [value-at-risk]
 
 The Greeks are the partial derivatives of the option price — the coefficients of a Taylor expansion in each input. **Delta** is how many shares the option behaves like, hence the hedge ratio; **gamma** is how fast delta changes, the convexity you own when long options and owe when short; **vega** is exposure to implied volatility, **theta** the daily rent paid for convexity, **rho** the rate sensitivity. The pivot is gamma against theta: a delta-hedged long option earns $\tfrac12\Gamma\,(dS)^2$ per move and pays $\Theta\,dt$ in decay, and in [[black-scholes]] they balance exactly when the stock moves at the implied volatility. That is the whole business of volatility trading.
 
+::: viz greeks Each Greek against spot
+Switch Greek and shorten the maturity: delta turns into a step, gamma and theta spike at the strike, vega dies. Short-dated at-the-money options are where every Greek becomes unstable.
+:::
+
 ## Key Formulas
 
 | Name | Formula |
